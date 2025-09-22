@@ -159,7 +159,7 @@ img {
 
 .what {
     background-color: #0F0B0B;
-    height: 564px;
+    min-height: 564px;
     padding: 20px 0;
 
     display: flex;
@@ -171,7 +171,7 @@ img {
 .what__img{
     position: relative;
     z-index: 1;
-    flex: 0 0 auto;
+    min-width: 40%;
 }
 .what__img img {
     display: block;
