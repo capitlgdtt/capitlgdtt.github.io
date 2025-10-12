@@ -109,21 +109,26 @@
 
 
 
-@media (max-width: 480px) {
-  .catalog__filters {
-    width: calc(100% - 28px);
-    margin: 20px 14px;
-    padding: 10px;
-    box-sizing: border-box;
-    justify-content: flex-start;
-  }
-  .catalog__grid {
-    padding: 10px 0;
-    margin: 0 14px;
-    box-sizing: border-box;
+@media (max-width: 360px) {
+  .catalog {
+    &__filters {
+      width: calc(100% - 28px);
+      margin: 20px 14px;
+      padding: 10px;
+      box-sizing: border-box;
+      justify-content: flex-start;
+    }
+    &__grid {
+      padding: 10px 0;
+      margin: 0 14px;
+      box-sizing: border-box;
 
-    &::before {
-      display: none;
+      &::before {
+        display: none;
+      }
+    }
+    &__item {
+      max-width: 100%;
     }
   }
 }
