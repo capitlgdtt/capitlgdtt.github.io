@@ -1,0 +1,123 @@
+.promo {
+  padding-top: 50px;
+  position: relative;
+
+  .container {
+    display: grid;
+    grid-template-areas:
+      "header"
+      "title"
+      "img"
+      "btn";
+    justify-items: center;
+    gap: 20px;
+  }
+
+  &__title {
+    grid-area: title;
+    margin-block-start: 50px;
+    padding-inline: 5px;
+    text-align: center;
+  }
+
+  &__img {
+    grid-area: img;
+    margin: 40px auto 0 auto;
+    width: 270px;
+    height: 377px;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.25);
+  }
+
+  &__btn {
+    grid-area: btn;
+    margin: 18px auto 0 auto;
+  }
+
+  &__potter {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .promo .container {
+    display: grid;
+    grid-template-areas:
+      "header   header"
+      "content  img"
+      ".        btn";
+    grid-template-columns: auto 0.4fr;
+    align-items: start;
+    padding-inline: 20px;
+  }
+  .promo__title {
+    grid-area: content;
+    text-align: left;
+    align-self: end;
+    justify-self: end;
+  }
+  .promo__img {
+    grid-area: img;
+    justify-self: end;
+    align-self: end;
+    width: 230px;
+    margin: 0;
+  }
+  .promo__btn {
+    grid-area: btn;
+    align-self: end;
+    justify-self: end;
+    width: 230px;
+    margin: 0;
+  }
+}
+
+@media (min-width: 1200px) {
+  .promo .container {
+    display: grid;
+    grid-template-areas:
+      "potter header header ."
+      "potter content img ."
+      "potter .   btn .";
+    grid-template-columns: 1fr 1fr 0.4fr 0.2fr;
+    grid-template-rows: auto auto auto;
+    align-items: stretch;
+    padding-inline: 20px;
+  }
+
+  .promo__potter {
+    display: block;
+    grid-area: potter;
+    max-width: 450px;
+    height: auto;
+    align-self: stretch;
+  }
+  .promo__title {
+    grid-area: content;
+    text-align: left;
+    align-self: end;
+    justify-self: end;
+  }
+  .promo__img {
+    grid-area: img;
+    justify-self: end;
+    align-self: end;
+    width: 230px;
+    margin: 0;
+  }
+  .promo__btn {
+    grid-area: btn;
+    align-self: end;
+    justify-self: end;
+    width: 230px;
+    margin: 0;
+  }
+}
+
+@media (min-width: 1920px) {
+  .promo__img {
+    width: 330px;
+  }
+  .promo__btn {
+    width: 330px;
+  }
+}

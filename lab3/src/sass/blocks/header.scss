@@ -1,0 +1,113 @@
+@use "/src/sass/base/variables.scss" as *;
+
+.header {
+  grid-area: header;
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  position: relative;
+  padding-inline: 20px;
+
+  &__logo {
+    width: 100px;
+    height: 100px;
+
+    margin: 0 auto;
+  }
+
+  &__icons {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+
+    a {
+      display: block;
+      color: $dark;
+
+      span {
+        display: block;
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+}
+
+.burger {
+  display: flex;
+  height: 23px;
+  flex-direction: column;
+  row-gap: 10px;
+  padding-right: 35px;
+
+  span {
+    display: block;
+    width: 20px;
+    height: 1px;
+    background-color: $dark;
+  }
+}
+
+@media (min-width: 768px) {
+  .burger {
+    visibility: hidden;
+  }
+
+  .header {
+    grid-area: header;
+    display: grid;
+    grid-template-areas:
+      "logo icons"
+      "menu icons";
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    justify-items: center;
+    width: 100%;
+    position: relative;
+
+    &__logo {
+      grid-area: logo;
+      justify-self: center;
+    }
+    &__icons {
+      grid-area: icons;
+      justify-self: end;
+      align-self: start;
+      display: flex;
+      gap: 15px;
+    }
+  }
+}
+
+@media (min-width: 1200px) {
+  .header {
+    grid-area: header;
+    display: grid;
+    grid-template-areas:
+      "logo icons"
+      "menu icons";
+    grid-template-columns: 0.4fr auto;
+    align-items: start;
+    justify-items: center;
+    width: 100%;
+    position: relative;
+
+    &__logo {
+      grid-area: logo;
+      justify-self: start;
+    }
+
+    &__icons {
+      grid-area: icons;
+      justify-self: end;
+      align-self: start;
+      display: flex;
+      gap: 15px;
+    }
+  }
+}
+
+@media (min-width: 1920px) {
+
+}

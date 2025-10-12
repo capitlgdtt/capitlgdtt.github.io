@@ -1,0 +1,167 @@
+﻿.footer {
+  padding: 50px 10px;
+  background: #232323;
+  color: #FAFAFA;
+
+  &__container {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  &__newsletter {
+    max-width: 400px;
+  }
+
+  &__cols {
+    margin-top: 40px;
+    gap: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+
+  &__social {
+    margin-top: 40px;
+  }
+
+  &__title {
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 100%;
+    text-transform: uppercase;
+  }
+
+  &__subtitle {
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 100%;
+  }
+
+  &__form input[type="email"] {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid #FAFAFA;
+    background: transparent;
+    padding: 10px 1px;
+    font-size: 14px;
+    outline: none;
+  }
+
+  &__btn {
+    margin: 20px auto 0 0;
+  }
+
+  &__subtitle-small {
+    text-transform: uppercase;
+    font-weight: 500;
+    font-size: 16px;
+  }
+
+  &__links ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  &__links li {
+    margin: 20px 0;
+  }
+
+  &__links a {
+    text-decoration: none;
+    font-size: 16px;
+    color: #fafafa;
+  }
+
+  .checkbox {
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+    font-size: 14px;
+    background-color: transparent;
+    accent-color: #fafafa;
+  }
+
+  .checkbox input {
+    margin-right: 8px;
+  }
+
+  .checkbox a {
+    color: #A22DC6;
+    text-decoration: none;
+  }
+
+  .social-icons {
+    display: flex;
+    gap: 10px;
+    margin-top: 40px;
+  }
+
+  .icon {
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .copyright {
+    margin-top: 40px;
+    font-size: 14px;
+    text-align: center;
+  }
+}
+
+@media (min-width: 768px) {
+  .footer {
+    &__container {
+      display: grid;
+      grid-template-areas:
+        "newsletter newsletter"
+        "cols social";
+      grid-template-columns: 2fr 1fr;
+      gap: 40px 60px;
+    }
+
+    &__newsletter {
+      grid-area: newsletter;
+    }
+
+    &__cols {
+      grid-area: cols;
+    }
+
+    &__social {
+      grid-area: social;
+      align-self: start;
+      justify-self: end;
+      margin-right: 20px;
+    }
+  }
+}
+
+@media (min-width: 1200px) {
+  .footer {
+    &__container {
+      grid-template-areas: "newsletter cols social";
+      grid-template-columns: 2fr 3fr 2fr;
+      align-items: start;
+    }
+    &__cols,
+    &__social {
+      margin-top: 0;
+    }
+    &__social {
+      justify-self: end;
+      margin-right: 20px;
+    }
+  }
+}
+
+@media (min-width: 1920px) {
+  .footer {
+    &__container {
+      margin: 0 auto;
+    }
+  }
+}
