@@ -15,9 +15,11 @@
     padding: 8px 14px 12px;
     border: 1px solid #232323;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     margin: 40px auto 36px 6%;
     background: transparent;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   &__filter {
@@ -107,14 +109,21 @@
 
 
 
-@media (min-width: 768px) {
+@media (max-width: 480px) {
+  .catalog__filters {
+    width: calc(100% - 28px);
+    margin: 20px 14px;
+    padding: 10px;
+    box-sizing: border-box;
+    justify-content: flex-start;
+  }
+  .catalog__grid {
+    padding: 10px 0;
+    margin: 0 14px;
+    box-sizing: border-box;
 
-}
-
-@media (min-width: 1200px) {
-
-}
-
-@media (min-width: 1920px) {
-
+    &::before {
+      display: none;
+    }
+  }
 }
