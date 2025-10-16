@@ -13,8 +13,10 @@
             href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;1,400&display=swap"
             rel="stylesheet"
     />
-  <script type="module" crossorigin src="./assets/script-B-r117cp.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/script-Dn4iqBkR.css">
+    <script src="https://unpkg.com/just-validate@latest/dist/just-validate.production.min.js"></script>
+  <script type="module" crossorigin src="./assets/catalog-Bh0uLl3_.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/forms-VwjCAZkT.js">
+  <link rel="stylesheet" crossorigin href="./assets/forms-C4-BF9u5.css">
 </head>
 <body>
 
@@ -48,9 +50,9 @@
     </h2>
 
     <div class="catalog__filters">
-        <button class="catalog__filter active">For Tea</button>
-        <button class="catalog__filter">For Kitchen</button>
-        <button class="catalog__filter">For Plants</button>
+        <button class="catalog__filter active" data-category="tea">For Tea</button>
+        <button class="catalog__filter" data-category="kitchen">For Kitchen</button>
+        <button class="catalog__filter" data-category="plants">For Plants</button>
     </div>
 
     <div class="catalog__grid">
@@ -71,13 +73,17 @@
             <div class="footer__newsletter">
                 <h4 class="footer__title">Newsletter</h4>
                 <h6 class="footer__subtitle">Keep up to date with news and promotions</h6>
-                <form class="footer__form">
+                <form class="footer__form" novalidate>
                     <label for="footer-email"></label>
                     <input type="email" id="footer-email" placeholder="Enter your e-mail" required>
+                    <div class="email-error-message"></div>
+
                     <div class="checkbox">
                         <input type="checkbox" id="footer-terms" required>
                         <label for="footer-terms">I agree with the <a href="#">terms</a></label>
                     </div>
+                    <div class="check-error-message"></div>
+
                     <button class="btn-footer footer__btn">Submit</button>
                 </form>
             </div>
@@ -116,6 +122,6 @@
         <div class="copyright">© Copyright 2025, Ceramic soul</div>
     </footer>
 </section>
-
+
 </body>
 </html>

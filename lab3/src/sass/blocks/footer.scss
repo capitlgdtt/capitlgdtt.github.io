@@ -47,6 +47,24 @@
     outline: none;
   }
 
+  .footer__form input,
+  .footer__form textarea {
+    color: #d2d2d2;
+    transition: all 0.3s ease;
+  }
+  .footer__form input::placeholder,
+  .footer__form textarea::placeholder {
+    color: #d9d9d9;
+    opacity: 1;
+  }
+  .footer__form input:focus,
+  .footer__form textarea:focus {
+    color: #d9d9d9;
+    border-color: #d2d2d2;
+    outline: none;
+  }
+
+
   &__btn {
     margin: 20px auto 0 0;
   }

@@ -13,6 +13,7 @@
             href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;1,400&display=swap"
             rel="stylesheet"
     />
+    <script src="https://unpkg.com/just-validate@latest/dist/just-validate.production.min.js"></script>
 </head>
 <body>
 
@@ -80,28 +81,32 @@
         </div>
 
         <div class="form__content">
-            <form>
+            <form class="contact-form" novalidate>
                 <div class="form__row">
                     <div class="form__field">
                         <label for="name">Name</label>
                         <input type="text" id="name" placeholder="Name" required>
+                        <div class="error-message name-error"></div>
                     </div>
 
                     <div class="form__field">
                         <label for="email">Email</label>
                         <input type="email" id="email" placeholder="Email" required>
+                        <div class="error-message email-error"></div>
                     </div>
                 </div>
 
                 <div class="form__field">
                     <label for="question">Your question</label>
-                    <textarea id="question" placeholder="Question" required></textarea>
+                    <textarea id="question" placeholder="Question"></textarea>
+                    <div class="error-message question-error"></div>
                 </div>
 
                 <div class="checkbox">
                     <input type="checkbox" id="terms" required>
                     <label for="terms">I agree with the <a href="#">terms</a></label>
                 </div>
+                <div class="error-message terms-error"></div>
 
                 <button class="btn-default form__btn">Send request</button>
             </form>
@@ -117,6 +122,29 @@
     <h2 class="title-h2-bold find_title">
         Find us
     </h2>
+
+    <div class="find__map">
+        <div style="position:relative;overflow:hidden;">
+            <a
+                    href="https://yandex.ru/maps?utm_medium=mapframe&utm_source=maps"
+                    style="color:#eee;font-size:12px;position:absolute;top:0px;">
+                Яндекс Карты
+            </a>
+            <a
+                    href="https://yandex.ru/maps/104131/upper-austria/geo/2822922119/?ll=12.874471%2C48.057695&utm_medium=mapframe&utm_source=maps&z=17.92"
+                    style="color:#eee;font-size:12px;position:absolute;top:14px;">
+                Fucking — Яндекс Карты
+            </a>
+            <iframe
+                    src="https://yandex.ru/map-widget/v1/?ll=12.874471%2C48.057695&mode=search&ol=geo&ouri=ymapsbm1%3A%2F%2Fgeo%3Fdata%3DCgoyODIyOTIyMTE5EjXDlnN0ZXJyZWljaCwgT2JlcsO2c3RlcnJlaWNoLCBCcmF1bmF1IGFtIElubiwgRnVja2luZyIKDUr-TUEV9zpAQg%2C%2C&z=17.92"
+                    width="560"
+                    height="400"
+                    frameborder="1"
+                    allowfullscreen="true"
+                    style="position:relative;">
+            </iframe>
+        </div>
+    </div>
 </section>
 
 <section>
@@ -125,13 +153,17 @@
             <div class="footer__newsletter">
                 <h4 class="footer__title">Newsletter</h4>
                 <h6 class="footer__subtitle">Keep up to date with news and promotions</h6>
-                <form class="footer__form">
+                <form class="footer__form" novalidate>
                     <label for="footer-email"></label>
                     <input type="email" id="footer-email" placeholder="Enter your e-mail" required>
+                    <div class="email-error-message"></div>
+
                     <div class="checkbox">
                         <input type="checkbox" id="footer-terms" required>
                         <label for="footer-terms">I agree with the <a href="#">terms</a></label>
                     </div>
+                    <div class="check-error-message"></div>
+
                     <button class="btn-footer footer__btn">Submit</button>
                 </form>
             </div>
@@ -172,5 +204,6 @@
 </section>
 
 <script type="module" src="src/js/script.js"></script>
+<script type="module" src="src/js/forms.js"></script>
 </body>
 </html>

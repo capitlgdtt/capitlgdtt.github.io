@@ -26,11 +26,15 @@
     width: 270px;
     height: 377px;
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.25);
+
+    animation: slideIn 1.2s ease-in-out forwards;
   }
 
   &__btn {
     grid-area: btn;
     margin: 18px auto 0 auto;
+
+    animation: slideIn 1.2s ease-in-out forwards;
   }
 
   &__potter {
@@ -119,5 +123,14 @@
   }
   .promo__btn {
     width: 330px;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(200%);
+  }
+  to {
+    transform: translateX(0);
   }
 }
