@@ -1,0 +1,209 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content="Website for Ceramic soul brand"/>
+    <meta name="author" content="Awesome student"/>
+    <title>Ceramic soul blog</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link
+            href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;1,400&display=swap"
+            rel="stylesheet"
+    />
+    <script src="https://unpkg.com/just-validate@latest/dist/just-validate.production.min.js"></script>
+</head>
+<body>
+
+<section class="about-us">
+    <header class="header header--static">
+        <div class="burger"><span></span><span></span><span></span></div>
+        <a href="#" class="header__logo">
+            <img src="src/logo/logo.png" alt="logo"/>
+        </a>
+        <div class="header__icons">
+            <a href="#"><span class="icon-search"></span></a>
+            <a href="#"><span class="icon-shopping-bag"></span></a>
+        </div>
+
+        <nav class="menu" aria-hidden="true">
+            <div class="menu__backdrop"></div>
+
+            <div class="menu__panel" role="dialog" aria-modal="true">
+                <button class="menu__close" aria-label="Close menu">✕</button>
+                <ul class="menu__list">
+                    <li><a href="catalog.html">Catalog</a></li>
+                    <li><a href="blog.html">Blog</a></li>
+                    <li><a href="about.html">About</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <h2 class="title-h2-bold about-us__title">
+        Where it all began
+    </h2>
+
+    <div class="about-us__content">
+        <img src="src/img/about/crafts.jpg" alt="Ceramics" class="about-us__img">
+        <div class="about-us__text">
+            <p>
+                Our small pottery workshop began as a simple passion project, rooted in a love for handmade artistry and
+                traditional craftsmanship. What started with a single wheel and a few lumps of clay has grown into a
+                cozy creative space where ideas take shape and stories are told through every piece. Inspired by
+                timeless techniques and the beauty of natural materials, we’ve built a place where both beginners and
+                experienced artists can come together, share their skills, and celebrate the art of pottery. Each
+                creation reflects our journey—shaped by hand, fired with care, and made to be cherished.
+            </p>
+            <p>
+                Over the years, our workshop has become more than just a place to create—it’s a community. Friends,
+                families, and curious visitors gather here to learn, connect, and experience the joy of working with
+                clay. From intimate masterclasses to collaborative projects, we believe in the power of handmade art to
+                bring people together and spark creativity in unexpected ways.
+            </p>
+            <p>
+                Every piece that leaves our studio carries a bit of our story, blending tradition with personal
+                expression. Whether it’s a simple cup or an intricate vase, our ceramics are crafted to be both
+                beautiful and functional, adding warmth and authenticity to any space.
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="form">
+    <h2 class="title-h2-bold form__title">Get in touch</h2>
+
+    <div class="form__wrapper">
+        <div class="form__image">
+            <img src="src/img/form/tea.jpg" alt="tea">
+        </div>
+
+        <div class="form__content">
+            <form class="contact-form" novalidate>
+                <div class="form__row">
+                    <div class="form__field">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" placeholder="Name" required>
+                        <div class="error-message name-error"></div>
+                    </div>
+
+                    <div class="form__field">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" placeholder="Email" required>
+                        <div class="error-message email-error"></div>
+                    </div>
+                </div>
+
+                <div class="form__field">
+                    <label for="question">Your question</label>
+                    <textarea id="question" placeholder="Question"></textarea>
+                    <div class="error-message question-error"></div>
+                </div>
+
+                <div class="checkbox">
+                    <input type="checkbox" id="terms" required>
+                    <label for="terms">I agree with the <a href="#">terms</a></label>
+                </div>
+                <div class="error-message terms-error"></div>
+
+                <button class="btn-default form__btn">Send request</button>
+            </form>
+        </div>
+
+        <div class="form__logo">
+            <img src="src/img/form/vase.png" alt="vase logo">
+        </div>
+    </div>
+</section>
+
+<section class="find">
+    <h2 class="title-h2-bold find_title">
+        Find us
+    </h2>
+
+    <div class="find__map">
+        <div style="position:relative;overflow:hidden;">
+            <a
+                    href="https://yandex.ru/maps?utm_medium=mapframe&utm_source=maps"
+                    style="color:#eee;font-size:12px;position:absolute;top:0px;">
+                Яндекс Карты
+            </a>
+            <a
+                    href="https://yandex.ru/maps/104131/upper-austria/geo/2822922119/?ll=12.874471%2C48.057695&utm_medium=mapframe&utm_source=maps&z=17.92"
+                    style="color:#eee;font-size:12px;position:absolute;top:14px;">
+                Fucking — Яндекс Карты
+            </a>
+            <iframe
+                    src="https://yandex.ru/map-widget/v1/?ll=12.874471%2C48.057695&mode=search&ol=geo&ouri=ymapsbm1%3A%2F%2Fgeo%3Fdata%3DCgoyODIyOTIyMTE5EjXDlnN0ZXJyZWljaCwgT2JlcsO2c3RlcnJlaWNoLCBCcmF1bmF1IGFtIElubiwgRnVja2luZyIKDUr-TUEV9zpAQg%2C%2C&z=17.92"
+                    width="560"
+                    height="400"
+                    frameborder="1"
+                    allowfullscreen="true"
+                    style="position:relative;">
+            </iframe>
+        </div>
+    </div>
+</section>
+
+<section>
+    <footer class="footer">
+        <div class="footer__container">
+            <div class="footer__newsletter">
+                <h4 class="footer__title">Newsletter</h4>
+                <h6 class="footer__subtitle">Keep up to date with news and promotions</h6>
+                <form class="footer__form" novalidate>
+                    <label for="footer-email"></label>
+                    <input type="email" id="footer-email" placeholder="Enter your e-mail" required>
+                    <div class="email-error-message"></div>
+
+                    <div class="checkbox">
+                        <input type="checkbox" id="footer-terms" required>
+                        <label for="footer-terms">I agree with the <a href="#">terms</a></label>
+                    </div>
+                    <div class="check-error-message"></div>
+
+                    <button class="btn-footer footer__btn">Submit</button>
+                </form>
+            </div>
+
+            <div class="footer__cols">
+                <div class="footer__links">
+                    <h4 class="footer__subtitle-small">Discover</h4>
+                    <ul>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="blog.html">Blog</a></li>
+                    </ul>
+                </div>
+                <div class="footer__links">
+                    <h4 class="footer__subtitle-small">Shopping</h4>
+                    <ul>
+                        <li><a href="catalog.html">Catalog</a></li>
+                    </ul>
+                </div>
+                <div class="footer__links">
+                    <h4 class="footer__subtitle-small">Information</h4>
+                    <ul>
+                        <li><a href="#">Terms and Conditions</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer__social">
+                <h4 class="footer__subtitle-small">Follow us</h4>
+                <div class="social-icons" aria-hidden="false">
+                    <a href="#" class="footer_icon"><img src="src/logo/facebook.png" alt="facebook"></a>
+                    <a href="#" class="footer_icon"><img src="src/logo/instagram.png" alt="instagram"></a>
+                    <a href="#" class="footer_icon"><img src="src/logo/pinterest.png" alt="pinterest"></a>
+                </div>
+            </div>
+        </div>
+        <div class="copyright">© Copyright 2025, Ceramic soul</div>
+    </footer>
+</section>
+
+<script type="module" src="src/js/script.js"></script>
+<script type="module" src="src/js/forms.js"></script>
+</body>
+</html>

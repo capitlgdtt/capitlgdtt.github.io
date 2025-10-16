@@ -1,0 +1,32 @@
+﻿.find {
+  padding: 20px 0;
+
+  &__title {
+    font-weight: 500;
+    font-size: 32px;
+    text-transform: uppercase;
+    margin: 80px 0;
+  }
+
+  &__map {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 660px;
+    min-width: 340px;
+    margin: 40px auto;
+    padding: 20px;
+
+    iframe {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      border: none;
+    }
+
+    div {
+      width: 100%;
+    }
+  }
+}

@@ -1,0 +1,134 @@
+﻿.menu {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+
+  &__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    opacity: 0;
+    transition: opacity 250ms ease;
+    pointer-events: none;
+  }
+  &__panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: #ffffff;
+    padding: 40px 28px;
+    transform: translateX(-100%);
+    transition: transform 330ms cubic-bezier(.2,.9,.2,1);
+    pointer-events: auto;
+    overflow-y: auto;
+  }
+  &__close {
+    position: fixed;
+    top: 42px;
+    left: 6px;
+
+    background: transparent;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+  }
+  &__list {
+    margin: 80px 0 0 0;
+    padding: 0;
+    list-style: none;
+    li {
+      margin-bottom: 26px;
+      a {
+        color: #232323;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 20px;
+        text-transform: uppercase;
+        font-weight: 400;
+      }
+    }
+  }
+  &.active {
+    pointer-events: auto;
+
+    .menu__backdrop {
+      pointer-events: auto;
+      opacity: 1;
+    }
+    .menu__panel {
+      transform: translateX(0);
+    }
+  }
+}
+
+@media (min-width: 768px) {
+  .menu {
+    grid-area: menu;
+    justify-self: center;
+    position: static;
+    transform: none;
+    margin: 10px auto 0 auto;
+    pointer-events: auto;
+
+    &__panel {
+      position: static;
+      width: auto;
+      height: auto;
+      background: transparent;
+      padding: 0;
+      transform: none;
+      overflow: visible;
+      transition: none;
+      pointer-events: auto;
+      display: flex;
+      justify-content: center;
+    }
+
+    &__backdrop,
+    &__close {
+      display: none;
+    }
+
+    &__list {
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      justify-content: center;
+      align-items: center;
+      white-space: nowrap;
+    }
+
+    &__list li a {
+      display: inline-block;
+      text-decoration: none;
+      text-transform: uppercase;
+      font-weight: 400;
+      font-size: 20px;
+      color: #232323;
+      padding: 6px 8px;
+    }
+  }
+}
+
+@media (min-width: 1200px) {
+  .menu {
+    grid-area: menu;
+    justify-self: center;
+    align-self: start;
+
+    &__list {
+      display: flex;
+      gap: 20px;
+    }
+  }
+}
+
+@media (min-width: 1920px) {
+
+}

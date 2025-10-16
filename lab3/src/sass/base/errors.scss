@@ -1,0 +1,33 @@
+﻿.email-error-message {
+  color: #db0c35;
+  font-size: 16px;
+  font-weight: 500;
+  min-height: 16px;
+  margin-top: 16px;
+}
+
+.check-error-message {
+  color: #db0c35;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.error-message {
+  display: block;
+  color: #db0c35;
+  font-size: 16px;
+  margin-top: 4px;
+}
+
+.terms-error {
+  margin-top: -16px;
+}
+
+.just-validate-error-field {
+  border: 1px solid #db0c35 !important;
+  outline: none;
+}
+
+.just-validate-success-field {
+  border: 1px solid #d2d2d2 !important;
+}
