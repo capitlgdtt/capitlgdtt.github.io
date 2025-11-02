@@ -20,7 +20,7 @@ export default function CurrentWeatherCard({ data, locationLabel, aqiData }: { d
         return () => observer.disconnect();
     }, []);
 
-    const imgPath = (name: string) => `../src/assets/${theme}/${name}.png`;
+    const imgPath = (name: string) => `../assets/${theme}/${name}.png`;
 
     const temp = Math.round(data.main?.temp);
     const feels = Math.round(data.main?.feels_like);

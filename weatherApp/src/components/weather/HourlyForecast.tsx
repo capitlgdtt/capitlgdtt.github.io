@@ -55,7 +55,7 @@ export default function HourlyForecast({ forecast, units }: { forecast: any; uni
                             <div className={styles.temp}>{temp}°{units === "metric" ? "C" : "F"}</div>
                             <div className={styles.wind}>
                                 <img
-                                    src={"../src/assets/navigation.png"}
+                                    src={"../assets/navigation.png"}
                                     alt="wind"
                                     className={styles.windIcon}
                                     style={{ transform: `rotate(${windDeg}deg)` }}

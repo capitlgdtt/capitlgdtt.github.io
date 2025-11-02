@@ -87,7 +87,7 @@ export default function SearchBar({
         setShowSuggestions(!!value.trim());
     };
 
-    const searchIcon = `../src/assets/${theme}/search.png`;
+    const searchIcon = `/assets/${theme}/search.png`;
 
     return (
         <div className="relative">

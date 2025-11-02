@@ -21,7 +21,7 @@ export default function CurrentLocationButton({ onLocationFound, disabled }: Cur
             className="flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-2xl shadow-lg transition-colors duration-300 h-16 w-16 md:w-auto px-4 md:px-6 whitespace-nowrap"
         >
             <img
-                src="../src/assets/current location icon.png"
+                src="/assets/current location icon.png"
                 alt={texts.currentLocation}
                 className="w-6 h-6 flex-shrink-0"
             />
