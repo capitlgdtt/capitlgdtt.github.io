@@ -1,0 +1,134 @@
+﻿.nav {
+    height: 80px;
+    font-family: 'Syne', sans-serif;
+    transform: translateY(0);
+    border-bottom: 2px solid var(--bg-secondary);
+    transition:
+            transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+            background-color 0.3s ease,
+            padding 0.3s ease;
+}
+
+.container-xlarge {
+    max-width: 1440px;
+    margin: 0 auto;
+}
+
+.flex-split {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-item {
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    position: relative;
+    padding-bottom: 4px;
+}
+
+.nav-item::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    width: 0;
+    background-color: var(--accent);
+    transition: width 0.3s ease;
+}
+
+.nav-item:hover::after {
+    width: 100%;
+}
+
+/* Theme Toggle */
+.theme-toggle-btn {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--text-secondary);
+}
+
+.theme-toggle-btn:hover {
+    background-color: var(--accent);
+    color: var(--bg-primary);
+}
+
+/* Burger */
+.burger-menu {
+    width: 28px;
+    height: 22px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.burger-menu div {
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background-color: var(--text-primary);
+    transition: all 0.4s ease;
+}
+
+.burger-menu-line-1 {
+    top: 0;
+}
+
+.burger-menu-line-2 {
+    top: 10px;
+}
+
+.burger-menu-line-3 {
+    bottom: 0;
+}
+
+.burger-menu.open .burger-menu-line-1 {
+    transform: rotate(45deg);
+    top: 10px;
+}
+
+.burger-menu.open .burger-menu-line-2 {
+    opacity: 0;
+}
+
+.burger-menu.open .burger-menu-line-3 {
+    transform: rotate(-45deg);
+    bottom: 10px;
+}
+
+/* Mobile menu */
+.mobile-nav-items-container {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    transform: translateY(-10px);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.5s cubic-bezier(0.25, 1, 0.3, 1);
+    z-index: 10;
+}
+
+.mobile-nav-items-container.open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.mobile-nav-items-wrapper {
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+}
+
+.mobile-nav-item {
+    padding: 15px 20px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    border-bottom: 1px solid var(--bg-secondary);
+}
+
+.mobile-nav-item:last-child {
+    border-bottom: none;
+}
