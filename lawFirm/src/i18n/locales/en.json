@@ -143,5 +143,8 @@
     "citiesAndOffices": "Cities and offices",
     "socialNetworks": "Social networks",
     "copyright": "All rights reserved"
+  },
+  "company": {
+    "name": "CompanyName"
   }
 }

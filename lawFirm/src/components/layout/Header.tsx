@@ -128,7 +128,7 @@ const Header: React.FC = () => {
                     className="nav-logo-container text-[var(--text-primary)] font-syne font-bold text-3xl tracking-tight cursor-pointer"
                     style={{ fontFamily: "'Syne', sans-serif !important" }}
                 >
-                    CompanyName
+                    {t('company.name')}
                 </button>
 
                 {/* Бургер */}

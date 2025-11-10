@@ -74,7 +74,7 @@ const Footer: React.FC = () => {
                         onClick={handleLogoClick}
                         className="font-bold text-3xl md:text-4xl tracking-tight text-[var(--text-primary)] mb-2 cursor-pointer hover:opacity-80 transition-opacity"
                     >
-                        CompanyName
+                        {t('company.name')}
                     </button>
                     <p className="text-[var(--text-secondary)] text-base md:text-lg leading-relaxed max-w-lg">
                         {t('footer.companySlogan')}
@@ -134,7 +134,7 @@ const Footer: React.FC = () => {
                 <div className="h-[1px] bg-[var(--text-secondary)]/20 mt-4 mb-6"></div>
 
                 <p className="text-[var(--text-secondary)] text-sm">
-                    &copy; 2024 CompanyName.{" "}
+                    &copy; 2024 {t('company.name')}.{" "}
                     <a
                         href="/copyright"
                         className="underline underline-offset-2 decoration-[var(--text-secondary)] hover:decoration-[var(--accent)] hover:text-[var(--accent)] transition-colors duration-300"

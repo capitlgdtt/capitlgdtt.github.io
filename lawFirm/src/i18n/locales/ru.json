@@ -142,5 +142,8 @@
     "citiesAndOffices": "Города и офисы",
     "socialNetworks": "Социальные сети",
     "copyright": "Все права защищены"
+  },
+  "company": {
+    "name": "НазваниеКомпании"
   }
 }
