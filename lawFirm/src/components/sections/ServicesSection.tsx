@@ -1,5 +1,6 @@
 ﻿import React, { useEffect, useRef, useState } from "react";
 import { useI18n } from "../../hooks/useI18n.ts";
+import {Link} from "react-router-dom";
 
 interface Service {
     id: number;
@@ -170,13 +171,9 @@ const ServicesSection: React.FC = () => {
 
                             {/* Нижняя панель */}
                             <div className="flex justify-between items-end mt-auto pt-6">
-                                <a
-                                    href={`/services?service=${service.id}`}
+                                <Link
+                                    to={`/services?service=${service.id}`}
                                     className="relative inline-flex items-center group"
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        window.location.href = `/services?service=${service.id}`;
-                                    }}
                                 >
                                     <div className="relative overflow-hidden">
                                         <div className="text-[var(--accent)] uppercase tracking-wide font-medium transition-transform duration-300 group-hover:-translate-y-full">
@@ -194,7 +191,7 @@ const ServicesSection: React.FC = () => {
                                             filter: theme === "dark" ? "invert(1) brightness(2)" : "invert(0)",
                                         }}
                                     />
-                                </a>
+                                </Link>
 
                                 <div className="text-[var(--accent)] text-4xl font-syne font-bold opacity-40 select-none">
                                     {String(service.id).padStart(2, "0")}
@@ -223,13 +220,9 @@ const ServicesSection: React.FC = () => {
                     visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
                 }`}
             >
-                <a
-                    href="/services"
+                <Link
+                    to="/services"
                     className="relative inline-flex items-center group py-8"
-                    onClick={(e) => {
-                        e.preventDefault();
-                        window.location.href = '/services';
-                    }}
                 >
                     <div className="relative overflow-hidden">
                         <div className="text-[var(--accent)] uppercase tracking-wide font-medium transition-transform duration-300 group-hover:-translate-y-full">
@@ -247,7 +240,7 @@ const ServicesSection: React.FC = () => {
                             filter: theme === "dark" ? "invert(1) brightness(2)" : "invert(0)",
                         }}
                     />
-                </a>
+                </Link>
             </div>
 
             {/* линия снизу */}

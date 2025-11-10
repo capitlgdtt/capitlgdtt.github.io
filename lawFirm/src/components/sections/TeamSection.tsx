@@ -1,5 +1,6 @@
 ﻿import React, { useEffect, useRef, useState } from "react";
 import { useI18n } from "../../hooks/useI18n.ts";
+import {Link} from "react-router-dom";
 
 interface TeamMember {
     id: number;
@@ -183,12 +184,16 @@ const TeamSection: React.FC = () => {
                 </div>
 
                 {/* Кнопка "see all the team" */}
+                {/* Кнопка "see all the team" */}
                 <div
                     className={`transition-all duration-1000 delay-700 mt-8 ${
                         visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
                     }`}
                 >
-                    <a href="/team" className="relative inline-flex items-center group py-8">
+                    <Link
+                        to="/team"
+                        className="relative inline-flex items-center group py-8"
+                    >
                         <div className="relative overflow-hidden">
                             <div className="text-[var(--accent)] uppercase tracking-wide font-medium transition-transform duration-300 group-hover:-translate-y-full">
                                 {t('team.section.seeAll')}
@@ -208,7 +213,7 @@ const TeamSection: React.FC = () => {
                                         : "invert(0)",
                             }}
                         />
-                    </a>
+                    </Link>
                 </div>
             </div>
 
