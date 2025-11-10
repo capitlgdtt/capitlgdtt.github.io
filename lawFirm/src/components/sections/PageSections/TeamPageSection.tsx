@@ -1,4 +1,5 @@
 ﻿import React, { useEffect, useRef, useState } from "react";
+import {useI18n} from "../../../hooks/useI18n.ts";
 
 interface TeamMember {
     id: number;
@@ -16,75 +17,150 @@ const TeamPageSection: React.FC = () => {
     const [visible, setVisible] = useState(false);
     const [theme, setTheme] = useState<"dark" | "light">("dark");
     const ref = useRef<HTMLDivElement>(null);
+    const { t, currentLanguage } = useI18n();
 
-    const teamMembers: TeamMember[] = [
-        {
-            id: 1,
-            name: "Phil Morrisson",
-            role: "Founder & CEO",
-            image: "/team/dmitry.jpg",
-            email: "phil@company.com",
-            phone: "+1 (555) 123-4567",
-            experience: "15+ years",
-            specialization: ["Corporate Law", "Mergers & Acquisitions", "International Law"],
-            description: "Expert in corporate law with extensive experience in international business transactions."
-        },
-        {
-            id: 2,
-            name: "Frederik Johansson",
-            role: "General Practice Lawyer",
-            image: "/team/sergei.jpg",
-            email: "frederik@company.com",
-            phone: "+1 (555) 123-4568",
-            experience: "12+ years",
-            specialization: ["Civil Law", "Contract Law", "Dispute Resolution"],
-            description: "Specialized in civil litigation and contract disputes with successful case history."
-        },
-        {
-            id: 3,
-            name: "John Wayne",
-            role: "General Practice Lawyer",
-            image: "/team/mikhail.jpg",
-            email: "john@company.com",
-            phone: "+1 (555) 123-4569",
-            experience: "10+ years",
-            specialization: ["Criminal Law", "Family Law", "Real Estate"],
-            description: "Dedicated to providing comprehensive legal solutions for individuals and families."
-        },
-        {
-            id: 4,
-            name: "Jane Smith",
-            role: "Senior Partner",
-            image: "/team/anna.jpg",
-            email: "jane@company.com",
-            phone: "+1 (555) 123-4570",
-            experience: "18+ years",
-            specialization: ["Tax Law", "Business Law", "Intellectual Property"],
-            description: "Leading expert in tax optimization and intellectual property protection."
-        },
-        {
-            id: 5,
-            name: "Robert Brown",
-            role: "Legal Consultant",
-            image: "/team/dmitry.jpg",
-            email: "robert@company.com",
-            phone: "+1 (555) 123-4571",
-            experience: "8+ years",
-            specialization: ["Employment Law", "Compliance", "Risk Management"],
-            description: "Focused on employment law and corporate compliance strategies."
-        },
-        {
-            id: 6,
-            name: "Sarah Wilson",
-            role: "Associate Lawyer",
-            image: "/team/anna.jpg",
-            email: "sarah@company.com",
-            phone: "+1 (555) 123-4572",
-            experience: "6+ years",
-            specialization: ["Immigration Law", "Administrative Law", "Human Rights"],
-            description: "Passionate about immigration law and protecting clients' rights."
-        }
-    ];
+    // Константные данные на двух языках
+    const teamMembers: Record<string, TeamMember[]> = {
+        en: [
+            {
+                id: 1,
+                name: "Phil Morrisson",
+                role: "Founder & CEO",
+                image: "/team/dmitry.jpg",
+                email: "phil@company.com",
+                phone: "+1 (555) 123-4567",
+                experience: "15+ years",
+                specialization: ["Corporate Law", "Mergers & Acquisitions", "International Law"],
+                description: "Expert in corporate law with extensive experience in international business transactions."
+            },
+            {
+                id: 2,
+                name: "Frederik Johansson",
+                role: "General Practice Lawyer",
+                image: "/team/sergei.jpg",
+                email: "frederik@company.com",
+                phone: "+1 (555) 123-4568",
+                experience: "12+ years",
+                specialization: ["Civil Law", "Contract Law", "Dispute Resolution"],
+                description: "Specialized in civil litigation and contract disputes with successful case history."
+            },
+            {
+                id: 3,
+                name: "John Wayne",
+                role: "General Practice Lawyer",
+                image: "/team/mikhail.jpg",
+                email: "john@company.com",
+                phone: "+1 (555) 123-4569",
+                experience: "10+ years",
+                specialization: ["Criminal Law", "Family Law", "Real Estate"],
+                description: "Dedicated to providing comprehensive legal solutions for individuals and families."
+            },
+            {
+                id: 4,
+                name: "Jane Smith",
+                role: "Senior Partner",
+                image: "/team/anna.jpg",
+                email: "jane@company.com",
+                phone: "+1 (555) 123-4570",
+                experience: "18+ years",
+                specialization: ["Tax Law", "Business Law", "Intellectual Property"],
+                description: "Leading expert in tax optimization and intellectual property protection."
+            },
+            {
+                id: 5,
+                name: "Robert Brown",
+                role: "Legal Consultant",
+                image: "/team/dmitry.jpg",
+                email: "robert@company.com",
+                phone: "+1 (555) 123-4571",
+                experience: "8+ years",
+                specialization: ["Employment Law", "Compliance", "Risk Management"],
+                description: "Focused on employment law and corporate compliance strategies."
+            },
+            {
+                id: 6,
+                name: "Sarah Wilson",
+                role: "Associate Lawyer",
+                image: "/team/anna.jpg",
+                email: "sarah@company.com",
+                phone: "+1 (555) 123-4572",
+                experience: "6+ years",
+                specialization: ["Immigration Law", "Administrative Law", "Human Rights"],
+                description: "Passionate about immigration law and protecting clients' rights."
+            }
+        ],
+        ru: [
+            {
+                id: 1,
+                name: "Фил Моррисон",
+                role: "Основатель и Генеральный директор",
+                image: "/team/dmitry.jpg",
+                email: "phil@company.com",
+                phone: "+1 (555) 123-4567",
+                experience: "15+ лет",
+                specialization: ["Корпоративное право", "Слияния и поглощения", "Международное право"],
+                description: "Эксперт в области корпоративного права с обширным опытом международных бизнес-транзакций."
+            },
+            {
+                id: 2,
+                name: "Фредерик Йоханссон",
+                role: "Юрист общей практики",
+                image: "/team/sergei.jpg",
+                email: "frederik@company.com",
+                phone: "+1 (555) 123-4568",
+                experience: "12+ лет",
+                specialization: ["Гражданское право", "Договорное право", "Разрешение споров"],
+                description: "Специализируется на гражданских судебных процессах и договорных спорах с успешной историей дел."
+            },
+            {
+                id: 3,
+                name: "Джон Уэйн",
+                role: "Юрист общей практики",
+                image: "/team/mikhail.jpg",
+                email: "john@company.com",
+                phone: "+1 (555) 123-4569",
+                experience: "10+ лет",
+                specialization: ["Уголовное право", "Семейное право", "Недвижимость"],
+                description: "Посвящен предоставлению комплексных юридических решений для частных лиц и семей."
+            },
+            {
+                id: 4,
+                name: "Джейн Смит",
+                role: "Старший партнер",
+                image: "/team/anna.jpg",
+                email: "jane@company.com",
+                phone: "+1 (555) 123-4570",
+                experience: "18+ лет",
+                specialization: ["Налоговое право", "Бизнес-право", "Интеллектуальная собственность"],
+                description: "Ведущий эксперт в области налоговой оптимизации и защиты интеллектуальной собственности."
+            },
+            {
+                id: 5,
+                name: "Роберт Браун",
+                role: "Юридический консультант",
+                image: "/team/dmitry.jpg",
+                email: "robert@company.com",
+                phone: "+1 (555) 123-4571",
+                experience: "8+ лет",
+                specialization: ["Трудовое право", "Комплаенс", "Управление рисками"],
+                description: "Сосредоточен на трудовом праве и корпоративных стратегиях соответствия."
+            },
+            {
+                id: 6,
+                name: "Сара Уилсон",
+                role: "Младший юрист",
+                image: "/team/anna.jpg",
+                email: "sarah@company.com",
+                phone: "+1 (555) 123-4572",
+                experience: "6+ лет",
+                specialization: ["Иммиграционное право", "Административное право", "Права человека"],
+                description: "Увлечена иммиграционным правом и защитой прав клиентов."
+            }
+        ]
+    };
+
+    // Получаем членов команды на текущем языке
+    const currentMembers = teamMembers[currentLanguage] || teamMembers.en;
 
     // появление секции
     useEffect(() => {
@@ -133,13 +209,13 @@ const TeamPageSection: React.FC = () => {
                     }`}
                 >
                     <h2 className="text-[5rem] md:text-[7rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
-                        meet our <span className="text-[var(--accent)]">team</span>
+                        {t('team.page.title')} <span className="text-[var(--accent)]">{t('team.page.accent')}</span>
                     </h2>
                 </div>
 
                 {/* Сетка карточек команды */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {teamMembers.map((member, index) => (
+                    {currentMembers.map((member, index) => (
                         <div
                             key={member.id}
                             className={`relative group transition-all duration-700 ease-out ${
@@ -187,7 +263,7 @@ const TeamPageSection: React.FC = () => {
                                     {/* Специализация */}
                                     <div className="mb-4 flex-1">
                                         <h4 className="text-sm font-semibold mb-2! text-[var(--text-secondary)]">
-                                            Specialization:
+                                            {t('team.specialization')}
                                         </h4>
                                         <div className="flex flex-wrap gap-2">
                                             {member.specialization.map((spec, idx) => (

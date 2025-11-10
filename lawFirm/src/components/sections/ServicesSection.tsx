@@ -1,4 +1,5 @@
 ﻿import React, { useEffect, useRef, useState } from "react";
+import { useI18n } from "../../hooks/useI18n.ts";
 
 interface Service {
     id: number;
@@ -11,45 +12,78 @@ const ServicesSection: React.FC = () => {
     const [visible, setVisible] = useState(false);
     const [theme, setTheme] = useState<"dark" | "light">("dark");
     const ref = useRef<HTMLDivElement>(null);
+    const { t, currentLanguage } = useI18n();
 
-    const services: Service[] = [
-        {
-            id: 1,
-            title: "Корпоративное право",
-            description:
-                "Полное юридическое сопровождение бизнеса, регистрация компаний, договорная работа.",
-        },
-        {
-            id: 2,
-            title: "Налоговое право",
-            description:
-                "Оптимизация налогообложения, защита в налоговых спорах, консультации.",
-        },
-        {
-            id: 3,
-            title: "Недвижимость",
-            description:
-                "Сделки с недвижимостью, сопровождение сделок, разрешение споров.",
-        },
-        {
-            id: 4,
-            title: "Семейное право",
-            description:
-                "Разводы, раздел имущества, алименты, брачные договоры.",
-        },
-        {
-            id: 5,
-            title: "Наследственное право",
-            description:
-                "Оформление наследства, оспаривание завещаний, наследственные споры.",
-        },
-        {
-            id: 6,
-            title: "Защита прав потребителей",
-            description:
-                "Взыскание убытков, защита от недобросовестных продавцов.",
-        },
-    ];
+    // Константные данные на двух языках
+    const servicesData: Record<string, Service[]> = {
+        en: [
+            {
+                id: 1,
+                title: "Corporate Law",
+                description: "Complete legal support for business, company registration, contract work.",
+            },
+            {
+                id: 2,
+                title: "Tax Law",
+                description: "Tax optimization, defense in tax disputes, consultations.",
+            },
+            {
+                id: 3,
+                title: "Real Estate",
+                description: "Real estate transactions, deal support, dispute resolution.",
+            },
+            {
+                id: 4,
+                title: "Family Law",
+                description: "Divorces, property division, alimony, marriage contracts.",
+            },
+            {
+                id: 5,
+                title: "Inheritance Law",
+                description: "Inheritance registration, will contestation, inheritance disputes.",
+            },
+            {
+                id: 6,
+                title: "Consumer Protection",
+                description: "Compensation for damages, protection from unfair sellers.",
+            },
+        ],
+        ru: [
+            {
+                id: 1,
+                title: "Корпоративное право",
+                description: "Полное юридическое сопровождение бизнеса, регистрация компаний, договорная работа.",
+            },
+            {
+                id: 2,
+                title: "Налоговое право",
+                description: "Оптимизация налогообложения, защита в налоговых спорах, консультации.",
+            },
+            {
+                id: 3,
+                title: "Недвижимость",
+                description: "Сделки с недвижимостью, сопровождение сделок, разрешение споров.",
+            },
+            {
+                id: 4,
+                title: "Семейное право",
+                description: "Разводы, раздел имущества, алименты, брачные договоры.",
+            },
+            {
+                id: 5,
+                title: "Наследственное право",
+                description: "Оформление наследства, оспаривание завещаний, наследственные споры.",
+            },
+            {
+                id: 6,
+                title: "Защита прав потребителей",
+                description: "Взыскание убытков, защита от недобросовестных продавцов.",
+            },
+        ]
+    };
+
+    // Получаем услуги на текущем языке
+    const services = servicesData[currentLanguage] || servicesData.en;
 
     // Анимация появления
     useEffect(() => {
@@ -104,7 +138,7 @@ const ServicesSection: React.FC = () => {
                     }`}
                 >
                     <h2 className="text-[5rem] md:text-[7rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
-                        our <span className="text-[var(--accent)]">expertises</span>
+                        {t('services.section.title.part1')} <span className="text-[var(--accent)]">{t('services.section.title.part2')}</span>
                     </h2>
                 </div>
 
@@ -146,14 +180,14 @@ const ServicesSection: React.FC = () => {
                                 >
                                     <div className="relative overflow-hidden">
                                         <div className="text-[var(--accent)] uppercase tracking-wide font-medium transition-transform duration-300 group-hover:-translate-y-full">
-                                            Подробнее
+                                            {t('services.section.details')}
                                         </div>
                                         <div className="absolute left-0 top-full text-[var(--accent)] uppercase tracking-wide font-medium transition-transform duration-300 group-hover:translate-y-[-100%]">
-                                            Подробнее
+                                            {t('services.section.details')}
                                         </div>
                                     </div>
                                     <img
-                                        src="https://cdn.prod.website-files.com/6160407763f5cd74b27c2405/6160407763f5cd15737c241e_icon-arrow-black-diag.svg"
+                                        src="/arrow_details.svg"
                                         alt="arrow"
                                         className="w-4 h-4 ml-2 transition-transform duration-300 group-hover:translate-x-1"
                                         style={{
@@ -199,10 +233,10 @@ const ServicesSection: React.FC = () => {
                 >
                     <div className="relative overflow-hidden">
                         <div className="text-[var(--accent)] uppercase tracking-wide font-medium transition-transform duration-300 group-hover:-translate-y-full">
-                            see all expertises
+                            {t('services.section.seeAll')}
                         </div>
                         <div className="absolute left-0 top-full text-[var(--accent)] uppercase tracking-wide font-medium transition-transform duration-300 group-hover:translate-y-[-100%]">
-                            see all expertises
+                            {t('services.section.seeAll')}
                         </div>
                     </div>
                     <img

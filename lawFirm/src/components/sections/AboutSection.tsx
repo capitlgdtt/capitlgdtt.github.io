@@ -1,8 +1,25 @@
 ﻿import React, { useEffect, useRef, useState } from "react";
+import {useI18n} from "../../hooks/useI18n.ts";
 
 const AboutSection: React.FC = () => {
     const [visible, setVisible] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
+    const { t, currentLanguage } = useI18n();
+
+    // Константные данные на двух языках
+    const aboutData: Record<string, string[]> = {
+        en: [
+            "Our company brings together lawyers, consultants and analysts with years of experience in the legal field. We create solutions for clients of any scale — from small businesses to international corporations.",
+            "In our work, we value transparency, efficiency and trust. Our experts accompany clients at all stages of interaction — from initial consultation to comprehensive case support."
+        ],
+        ru: [
+            "Наша компания объединяет юристов, консультантов и аналитиков с многолетним опытом работы в сфере права. Мы создаем решения для клиентов любого масштаба — от малого бизнеса до международных корпораций.",
+            "В своей работе мы ценим прозрачность, эффективность и доверие. Наши эксперты сопровождают клиентов на всех этапах взаимодействия — от первичной консультации до комплексного сопровождения дел."
+        ]
+    };
+
+    // Получаем параграфы на текущем языке
+    const paragraphs = aboutData[currentLanguage] || aboutData.en;
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -12,11 +29,6 @@ const AboutSection: React.FC = () => {
         if (ref.current) observer.observe(ref.current);
         return () => observer.disconnect();
     }, []);
-
-    const paragraphs = [
-        "Наша компания объединяет юристов, консультантов и аналитиков с многолетним опытом работы в сфере права. Мы создаем решения для клиентов любого масштаба — от малого бизнеса до международных корпораций.",
-        "В своей работе мы ценим прозрачность, эффективность и доверие. Наши эксперты сопровождают клиентов на всех этапах взаимодействия — от первичной консультации до комплексного сопровождения дел.",
-    ];
 
     return (
         <section
@@ -35,7 +47,7 @@ const AboutSection: React.FC = () => {
                     }`}
                 >
                     <h2 className="text-[5rem] md:text-[7rem] font-syne uppercase font-semibold leading-tight">
-                        who <span className="text-[var(--accent)]">we are</span>
+                        {t('about.title.part1')} <span className="text-[var(--accent)]">{t('about.title.part2')}</span>
                     </h2>
                 </div>
 

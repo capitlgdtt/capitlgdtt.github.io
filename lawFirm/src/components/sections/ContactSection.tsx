@@ -1,4 +1,5 @@
 ﻿import React, { useState, useEffect, useRef } from "react";
+import {useI18n} from "../../hooks/useI18n.ts";
 
 interface FormErrors {
     name?: string;
@@ -19,6 +20,7 @@ const ContactSection: React.FC = () => {
     const [visible, setVisible] = useState(false);
     const [theme, setTheme] = useState<"dark" | "light">("dark");
     const ref = useRef<HTMLDivElement>(null);
+    const { t, currentLanguage } = useI18n();
 
     const [formData, setFormData] = useState({
         name: "",
@@ -31,15 +33,30 @@ const ContactSection: React.FC = () => {
     const [errors, setErrors] = useState<FormErrors>({});
     const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-    const services = [
-        "Корпоративное право",
-        "Налоговое право",
-        "Недвижимость",
-        "Семейное право",
-        "Наследственное право",
-        "Защита прав потребителей",
-        "Другое",
-    ];
+    // Константные данные на двух языках
+    const servicesData: Record<string, string[]> = {
+        en: [
+            "Corporate Law",
+            "Tax Law",
+            "Real Estate",
+            "Family Law",
+            "Inheritance Law",
+            "Consumer Rights Protection",
+            "Other",
+        ],
+        ru: [
+            "Корпоративное право",
+            "Налоговое право",
+            "Недвижимость",
+            "Семейное право",
+            "Наследственное право",
+            "Защита прав потребителей",
+            "Другое",
+        ]
+    };
+
+    // Получаем услуги на текущем языке
+    const services = servicesData[currentLanguage] || servicesData.en;
 
     // Автоматическое заполнение услуги
     useEffect(() => {
@@ -82,21 +99,21 @@ const ContactSection: React.FC = () => {
         if (!fieldRules) return "";
 
         if (fieldRules.required && !value.trim()) {
-            return "Это поле обязательно для заполнения";
+            return t('contact.errors.required');
         }
 
         if (fieldRules.minLength && value.trim().length < fieldRules.minLength) {
-            return `Минимальная длина: ${fieldRules.minLength} символов`;
+            return t('contact.errors.minLength', { length: fieldRules.minLength });
         }
 
         if (fieldRules.email && value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-            return "Введите корректный email";
+            return t('contact.errors.email');
         }
 
         if (fieldRules.phone && value) {
             const phoneDigits = value.replace(/\D/g, '');
             if (phoneDigits.length !== 10) {
-                return "Введите корректный номер телефона";
+                return t('contact.errors.phone');
             }
         }
 
@@ -167,7 +184,7 @@ const ContactSection: React.FC = () => {
         if (validateForm()) {
             console.log("Форма отправлена:", formData);
             // Здесь можно добавить отправку на сервер
-            alert("Форма успешно отправлена!");
+            alert(t('contact.successMessage'));
 
             // Сброс формы
             setFormData({
@@ -231,7 +248,7 @@ const ContactSection: React.FC = () => {
                     }`}
                 >
                     <h2 className="text-[5rem] md:text-[7rem] font-syne uppercase font-semibold leading-tight break-words">
-                        get a <span className="text-[var(--accent)]">consultation</span>
+                        {t('contact.title.part1')} <span className="text-[var(--accent)]">{t('contact.title.part2')}</span>
                     </h2>
                 </div>
 
@@ -243,18 +260,18 @@ const ContactSection: React.FC = () => {
                     {/* Левая колонка — контакты */}
                     <div className="space-y-10">
                         <p className="text-lg md:text-xl text-[var(--text-secondary)] max-w-[80%] leading-relaxed mb-12!">
-                            Оставьте заявку, и наш юрист свяжется с вами в течение{" "}
+                            {t('contact.description.part1')}{" "}
                             <span className="text-[var(--accent)] font-semibold whitespace-nowrap">
-                                30 минут
+                                {t('contact.description.part2')}
                             </span>{" "}
-                            для бесплатной консультации.
+                            {t('contact.description.part3')}
                         </p>
 
                         <div className="flex items-start">
                             <div className="p-3 mr-5 bg-[var(--accent)] rounded-2xl text-[var(--bg-primary)] text-2xl">
                                 <img
                                     src="/icons/phone.png"
-                                    alt="Phone"
+                                    alt={t('contact.phone')}
                                     className="w-6 h-6"
                                     style={{
                                         filter: theme === "dark" ? "invert(1) brightness(2)" : "invert(0)"
@@ -263,7 +280,7 @@ const ContactSection: React.FC = () => {
                             </div>
                             <div>
                                 <h3 className="font-semibold text-xl mb-1">
-                                    Телефон
+                                    {t('contact.phone')}
                                 </h3>
                                 <p className="text-[var(--text-secondary)] text-lg">
                                     +7 (495) 123-45-67
@@ -275,7 +292,7 @@ const ContactSection: React.FC = () => {
                             <div className="p-3 mr-5 bg-[var(--accent)] rounded-2xl text-[var(--bg-primary)] text-2xl">
                                 <img
                                     src="/icons/mail.png"
-                                    alt="Email"
+                                    alt={t('contact.email')}
                                     className="w-6 h-6"
                                     style={{
                                         filter: theme === "dark" ? "invert(1) brightness(2)" : "invert(0)"
@@ -284,7 +301,7 @@ const ContactSection: React.FC = () => {
                             </div>
                             <div>
                                 <h3 className="font-semibold text-xl mb-1">
-                                    Email
+                                    {t('contact.email')}
                                 </h3>
                                 <p className="text-[var(--text-secondary)] text-lg">
                                     info@legaltrust.ru
@@ -296,7 +313,7 @@ const ContactSection: React.FC = () => {
                             <div className="p-3 mr-5 bg-[var(--accent)] rounded-2xl text-[var(--bg-primary)] text-2xl">
                                 <img
                                     src="/icons/time.png"
-                                    alt="Time"
+                                    alt={t('contact.workHours')}
                                     className="w-6 h-6"
                                     style={{
                                         filter: theme === "dark" ? "invert(1) brightness(2)" : "invert(0)"
@@ -305,13 +322,13 @@ const ContactSection: React.FC = () => {
                             </div>
                             <div>
                                 <h3 className="font-semibold text-xl mb-1">
-                                    Время работы
+                                    {t('contact.workHours')}
                                 </h3>
                                 <p className="text-[var(--text-secondary)] text-lg">
-                                    Пн–Пт: 9:00–18:00
+                                    {t('contact.workDays')}
                                 </p>
                                 <p className="text-[var(--text-secondary)] text-lg">
-                                    Сб: 10:00–16:00
+                                    {t('contact.weekend')}
                                 </p>
                             </div>
                         </div>
@@ -329,7 +346,7 @@ const ContactSection: React.FC = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label className="block text-sm mb-2 font-medium">
-                                        Имя *
+                                        {t('contact.form.name')} *
                                     </label>
                                     <input
                                         type="text"
@@ -341,7 +358,7 @@ const ContactSection: React.FC = () => {
                                         className={`w-full bg-transparent border px-4 py-3 focus:border-[var(--accent)] outline-none transition text-[var(--text-primary)] placeholder-[var(--text-secondary)] ${
                                             errors.name ? 'border-red-500' : 'border-[var(--text-secondary)]'
                                         }`}
-                                        placeholder="Ваше имя"
+                                        placeholder={t('contact.placeholders.name')}
                                     />
                                     {errors.name && (
                                         <p className="text-red-500 text-xs mt-1">{errors.name}</p>
@@ -349,7 +366,7 @@ const ContactSection: React.FC = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm mb-2 font-medium">
-                                        Телефон *
+                                        {t('contact.form.phone')} *
                                     </label>
                                     <input
                                         type="tel"
@@ -361,7 +378,7 @@ const ContactSection: React.FC = () => {
                                         className={`w-full bg-transparent border px-4 py-3 focus:border-[var(--accent)] outline-none transition text-[var(--text-primary)] placeholder-[var(--text-secondary)] ${
                                             errors.phone ? 'border-red-500' : 'border-[var(--text-secondary)]'
                                         }`}
-                                        placeholder="+7 (___) ___-__-__"
+                                        placeholder={t('contact.placeholders.phone')}
                                     />
                                     {errors.phone && (
                                         <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
@@ -371,7 +388,7 @@ const ContactSection: React.FC = () => {
 
                             <div>
                                 <label className="block text-sm mb-2 font-medium">
-                                    Email
+                                    {t('contact.form.email')}
                                 </label>
                                 <input
                                     type="email"
@@ -382,7 +399,7 @@ const ContactSection: React.FC = () => {
                                     className={`w-full bg-transparent border px-4 py-3 focus:border-[var(--accent)] outline-none transition text-[var(--text-primary)] placeholder-[var(--text-secondary)] ${
                                         errors.email ? 'border-red-500' : 'border-[var(--text-secondary)]'
                                     }`}
-                                    placeholder="your@email.com"
+                                    placeholder={t('contact.placeholders.email')}
                                 />
                                 {errors.email && (
                                     <p className="text-red-500 text-xs mt-1">{errors.email}</p>
@@ -391,7 +408,7 @@ const ContactSection: React.FC = () => {
 
                             <div>
                                 <label className="block text-sm mb-2 font-medium">
-                                    Интересующая услуга *
+                                    {t('contact.form.service')} *
                                 </label>
                                 <div className="relative">
                                     <select
@@ -407,7 +424,7 @@ const ContactSection: React.FC = () => {
                                             color: "var(--text-primary)"
                                         }}
                                     >
-                                        <option value="">Выберите услугу</option>
+                                        <option value="">{t('contact.placeholders.service')}</option>
                                         {services.map((s, i) => (
                                             <option key={i} value={s} style={{
                                                 backgroundColor: theme === "dark" ? "var(--bg-secondary)" : "white",
@@ -433,7 +450,7 @@ const ContactSection: React.FC = () => {
 
                             <div>
                                 <label className="block text-sm mb-2 font-medium">
-                                    Сообщение
+                                    {t('contact.form.message')}
                                 </label>
                                 <textarea
                                     name="message"
@@ -444,7 +461,7 @@ const ContactSection: React.FC = () => {
                                     className={`w-full bg-transparent border px-4 py-3 focus:border-[var(--accent)] outline-none transition resize-none text-[var(--text-primary)] placeholder-[var(--text-secondary)] ${
                                         errors.message ? 'border-red-500' : 'border-[var(--text-secondary)]'
                                     }`}
-                                    placeholder="Опишите вашу ситуацию..."
+                                    placeholder={t('contact.placeholders.message')}
                                 />
                                 {errors.message && (
                                     <p className="text-red-500 text-xs mt-1">{errors.message}</p>
@@ -458,21 +475,21 @@ const ContactSection: React.FC = () => {
                             >
                                 <div className="relative overflow-hidden">
                                     <div className="text-[var(--accent)] uppercase tracking-wide font-medium transition-transform duration-300 group-hover:-translate-y-full">
-                                        получить консультацию
+                                        {t('contact.submit')}
                                     </div>
                                     <div className="absolute left-0 top-full text-[var(--accent)] uppercase tracking-wide font-medium transition-transform duration-300 group-hover:translate-y-[-100%]">
-                                        получить консультацию
+                                        {t('contact.submit')}
                                     </div>
                                 </div>
                             </button>
 
                             <p className="text-sm text-[var(--text-secondary)] text-center mt-4">
-                                Нажимая кнопку, вы соглашаетесь с{" "}
+                                {t('contact.privacy.part1')}{" "}
                                 <a
                                     href="/privacy"
                                     className="text-[var(--accent)] underline"
                                 >
-                                    политикой конфиденциальности
+                                    {t('contact.privacy.part2')}
                                 </a>
                             </p>
                         </form>

@@ -1,4 +1,5 @@
 ﻿import React, { useEffect, useRef, useState } from "react";
+import { useI18n } from "../../hooks/useI18n.ts";
 
 interface TeamMember {
     id: number;
@@ -12,33 +13,66 @@ const TeamSection: React.FC = () => {
     const [theme, setTheme] = useState<"dark" | "light">("dark");
     const [hoveredMember, setHoveredMember] = useState<number | null>(null);
     const ref = useRef<HTMLDivElement>(null);
+    const { t, currentLanguage } = useI18n();
 
-    const teamMembers: TeamMember[] = [
-        {
-            id: 1,
-            name: "Phil Morrisson",
-            role: "Founder & CEO",
-            image: "/team/dmitry.jpg",
-        },
-        {
-            id: 2,
-            name: "Frederik Johansson",
-            role: "General practice lawyer",
-            image: "/team/sergei.jpg",
-        },
-        {
-            id: 3,
-            name: "John Wayne",
-            role: "General practice lawyer",
-            image: "/team/mikhail.jpg",
-        },
-        {
-            id: 4,
-            name: "Jane Smith",
-            role: "Founder & CEO",
-            image: "/team/anna.jpg",
-        },
-    ];
+    // Константные данные на двух языках
+    const teamMembersData: Record<string, TeamMember[]> = {
+        en: [
+            {
+                id: 1,
+                name: "Phil Morrisson",
+                role: "Founder & CEO",
+                image: "/team/dmitry.jpg",
+            },
+            {
+                id: 2,
+                name: "Frederik Johansson",
+                role: "General practice lawyer",
+                image: "/team/sergei.jpg",
+            },
+            {
+                id: 3,
+                name: "John Wayne",
+                role: "General practice lawyer",
+                image: "/team/mikhail.jpg",
+            },
+            {
+                id: 4,
+                name: "Jane Smith",
+                role: "Founder & CEO",
+                image: "/team/anna.jpg",
+            },
+        ],
+        ru: [
+            {
+                id: 1,
+                name: "Фил Моррисон",
+                role: "Основатель и CEO",
+                image: "/team/dmitry.jpg",
+            },
+            {
+                id: 2,
+                name: "Фредерик Йоханссон",
+                role: "Юрист общей практики",
+                image: "/team/sergei.jpg",
+            },
+            {
+                id: 3,
+                name: "Джон Уэйн",
+                role: "Юрист общей практики",
+                image: "/team/mikhail.jpg",
+            },
+            {
+                id: 4,
+                name: "Джейн Смит",
+                role: "Основатель и CEO",
+                image: "/team/anna.jpg",
+            },
+        ]
+    };
+
+    // Получаем команду на текущем языке
+    const teamMembers = teamMembersData[currentLanguage] || teamMembersData.en;
 
     // появление секции
     useEffect(() => {
@@ -87,7 +121,7 @@ const TeamSection: React.FC = () => {
                     }`}
                 >
                     <h2 className="text-[5rem] md:text-[7rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
-                        our <span className="text-[var(--accent)]">team</span>
+                        {t('team.section.title.part1')} <span className="text-[var(--accent)]">{t('team.section.title.part2')}</span>
                     </h2>
                 </div>
 
@@ -157,10 +191,10 @@ const TeamSection: React.FC = () => {
                     <a href="/team" className="relative inline-flex items-center group py-8">
                         <div className="relative overflow-hidden">
                             <div className="text-[var(--accent)] uppercase tracking-wide font-medium transition-transform duration-300 group-hover:-translate-y-full">
-                                see all the team
+                                {t('team.section.seeAll')}
                             </div>
                             <div className="absolute left-0 top-full text-[var(--accent)] uppercase tracking-wide font-medium transition-transform duration-300 group-hover:translate-y-[-100%]">
-                                see all the team
+                                {t('team.section.seeAll')}
                             </div>
                         </div>
                         <img

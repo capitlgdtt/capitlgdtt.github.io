@@ -5,6 +5,7 @@ import HomePage from './pages/HomePage';
 import ServicesPage from './pages/ServicesPage';
 import TeamPage from './pages/TeamPage';
 import BlogPage from './pages/BlogPage';
+import './i18n';
 
 const App: React.FC = () => {
     return (

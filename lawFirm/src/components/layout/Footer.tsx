@@ -1,4 +1,6 @@
 ﻿import React from "react";
+import { useI18n } from "../../hooks/useI18n.ts";
+import { useNavigate } from "react-router-dom";
 
 interface Office {
     city: string;
@@ -12,19 +14,49 @@ interface SocialLink {
 }
 
 const Footer: React.FC = () => {
-    const offices: Office[] = [
-        { city: "Москва", address: "ул. Правовая, 15, 115191", phone: "+7 (495) 123-45-67" },
-        { city: "Санкт-Петербург", address: "Невский пр., 100, 191186", phone: "+7 (812) 456-78-90" },
-        { city: "Екатеринбург", address: "ул. Юридическая, 25, 620014", phone: "+7 (343) 789-01-23" },
-        { city: "Казань", address: "ул. Кремлевская, 35, 420111", phone: "+7 (843) 234-56-78" }
-    ];
+    const { t, currentLanguage } = useI18n();
+    const navigate = useNavigate();
 
-    const socialLinks: SocialLink[] = [
-        { name: "ВКонтакте", url: "#" },
-        { name: "Telegram", url: "#" },
-        { name: "WhatsApp", url: "#" },
-        { name: "YouTube", url: "#" }
-    ];
+    // Константные данные на двух языках
+    const officesData: Record<string, Office[]> = {
+        en: [
+            { city: "Moscow", address: "Pravovaya st., 15, 115191", phone: "+7 (495) 123-45-67" },
+            { city: "Saint Petersburg", address: "Nevsky pr., 100, 191186", phone: "+7 (812) 456-78-90" },
+            { city: "Yekaterinburg", address: "Yuridicheskaya st., 25, 620014", phone: "+7 (343) 789-01-23" },
+            { city: "Kazan", address: "Kremlyovskaya st., 35, 420111", phone: "+7 (843) 234-56-78" }
+        ],
+        ru: [
+            { city: "Москва", address: "ул. Правовая, 15, 115191", phone: "+7 (495) 123-45-67" },
+            { city: "Санкт-Петербург", address: "Невский пр., 100, 191186", phone: "+7 (812) 456-78-90" },
+            { city: "Екатеринбург", address: "ул. Юридическая, 25, 620014", phone: "+7 (343) 789-01-23" },
+            { city: "Казань", address: "ул. Кремлевская, 35, 420111", phone: "+7 (843) 234-56-78" }
+        ]
+    };
+
+    const socialLinksData: Record<string, SocialLink[]> = {
+        en: [
+            { name: "VKontakte", url: "#" },
+            { name: "Telegram", url: "#" },
+            { name: "WhatsApp", url: "#" },
+            { name: "YouTube", url: "#" }
+        ],
+        ru: [
+            { name: "ВКонтакте", url: "#" },
+            { name: "Telegram", url: "#" },
+            { name: "WhatsApp", url: "#" },
+            { name: "YouTube", url: "#" }
+        ]
+    };
+
+    // Получаем данные на текущем языке
+    const offices = officesData[currentLanguage] || officesData.en;
+    const socialLinks = socialLinksData[currentLanguage] || socialLinksData.en;
+
+    const handleLogoClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        navigate('/');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     return (
         <footer
@@ -38,14 +70,14 @@ const Footer: React.FC = () => {
 
                 {/* Логотип и описание */}
                 <div className="flex flex-col items-start mb-8">
-                    <a
-                        href="#home"
-                        className="font-bold text-3xl md:text-4xl tracking-tight text-[var(--text-primary)] mb-2"
+                    <button
+                        onClick={handleLogoClick}
+                        className="font-bold text-3xl md:text-4xl tracking-tight text-[var(--text-primary)] mb-2 cursor-pointer hover:opacity-80 transition-opacity"
                     >
                         CompanyName
-                    </a>
+                    </button>
                     <p className="text-[var(--text-secondary)] text-base md:text-lg leading-relaxed max-w-lg">
-                        companySlogan
+                        {t('footer.companySlogan')}
                     </p>
                 </div>
 
@@ -54,7 +86,7 @@ const Footer: React.FC = () => {
 
                 {/* Города и офисы */}
                 <div className="text-xs md:text-sm font-semibold uppercase tracking-widest text-[var(--text-primary)] mb-3 mt-3">
-                    Города и офисы
+                    {t('footer.citiesAndOffices')}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -83,7 +115,7 @@ const Footer: React.FC = () => {
 
                 {/* Социальные сети */}
                 <div className="text-sm font-semibold uppercase tracking-widest text-[var(--text-primary)] mb-3 mt-3">
-                    Социальные сети
+                    {t('footer.socialNetworks')}
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -107,7 +139,7 @@ const Footer: React.FC = () => {
                         href="/copyright"
                         className="underline underline-offset-2 decoration-[var(--text-secondary)] hover:decoration-[var(--accent)] hover:text-[var(--accent)] transition-colors duration-300"
                     >
-                        Все права защищены
+                        {t('footer.copyright')}
                     </a>
                 </p>
             </div>

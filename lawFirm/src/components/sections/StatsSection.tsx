@@ -1,4 +1,5 @@
 ﻿import React, { useEffect, useRef, useState } from "react";
+import { useI18n } from "../../hooks/useI18n.ts";
 
 interface StatItem {
     number: number;
@@ -10,14 +11,27 @@ const StatsSection: React.FC = () => {
     const [visible, setVisible] = useState(false);
     const [animatedValues, setAnimatedValues] = useState<number[]>([]);
     const ref = useRef<HTMLDivElement>(null);
+    const { t, currentLanguage } = useI18n();
 
-    const stats: StatItem[] = [
-        { number: 200, label: "Клиентов", hasPlus: true },
-        { number: 8, label: "Лет опыта" },
-        { number: 22, label: "Юристов" },
-        { number: 15, label: "Стран присутствия" },
-        { number: 72, label: "Проектов в год", hasPlus: true },
-    ];
+    const statsData: Record<string, StatItem[]> = {
+        en: [
+            { number: 200, label: "Clients", hasPlus: true },
+            { number: 8, label: "Years of experience" },
+            { number: 22, label: "Lawyers" },
+            { number: 15, label: "Countries of presence" },
+            { number: 72, label: "Projects per year", hasPlus: true },
+        ],
+        ru: [
+            { number: 200, label: "Клиентов", hasPlus: true },
+            { number: 8, label: "Лет опыта" },
+            { number: 22, label: "Юристов" },
+            { number: 15, label: "Стран присутствия" },
+            { number: 72, label: "Проектов в год", hasPlus: true },
+        ]
+    };
+
+    // Получаем статистику на текущем языке
+    const stats = statsData[currentLanguage] || statsData.en;
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -59,7 +73,7 @@ const StatsSection: React.FC = () => {
                     }`}
                 >
                     <h2 className="text-[5rem] md:text-[7rem] font-syne uppercase font-semibold leading-tight">
-                        key <span className="text-[var(--accent)]">figures</span>
+                        {t('stats.title.part1')} <span className="text-[var(--accent)]">{t('stats.title.part2')}</span>
                     </h2>
                 </div>
 

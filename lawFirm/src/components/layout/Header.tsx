@@ -1,13 +1,17 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
 import ThemeToggle from './ThemeToggle';
 import { useNavigate } from 'react-router-dom';
+import LanguageToggle from "./LanguageToggle.tsx";
+import { useI18n } from "../../hooks/useI18n.ts";
 
 const Header: React.FC = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const [isHidden, setIsHidden] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const lastScrollY = useRef(0);
     const navigate = useNavigate();
+    const { t } = useI18n();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -31,18 +35,32 @@ const Header: React.FC = () => {
         const handleClickOutside = (event: MouseEvent) => {
             const mobileMenu = document.querySelector('.mobile-nav-items-container');
             const burgerButton = document.querySelector('.burger-menu');
+            const settingsBurger = document.querySelector('.burger-menu.lg\\:flex');
+            const settingsDropdown = document.querySelector('.absolute.top-full.right-0');
 
+            // Закрытие мобильного меню
             if (isMobileMenuOpen &&
                 mobileMenu &&
                 !mobileMenu.contains(event.target as Node) &&
                 !burgerButton?.contains(event.target as Node)) {
                 setIsMobileMenuOpen(false);
             }
+
+            // Закрытие выпадающего меню настроек
+            if (isSettingsOpen &&
+                settingsDropdown &&
+                !settingsDropdown.contains(event.target as Node) &&
+                !settingsBurger?.contains(event.target as Node)) {
+                setIsSettingsOpen(false);
+            }
         };
 
         const handleScrollClose = () => {
             if (isMobileMenuOpen) {
                 setIsMobileMenuOpen(false);
+            }
+            if (isSettingsOpen) {
+                setIsSettingsOpen(false);
             }
         };
 
@@ -53,14 +71,14 @@ const Header: React.FC = () => {
             document.removeEventListener('mousedown', handleClickOutside);
             window.removeEventListener('scroll', handleScrollClose);
         };
-    }, [isMobileMenuOpen]);
+    }, [isMobileMenuOpen, isSettingsOpen]);
 
     const navItems = [
-        { href: '#home', label: 'Home' },
-        { href: '#services', label: 'Expertises' },
-        { href: '#team', label: 'Team' },
-        { href: '#blog', label: 'Blog' },
-        { href: '#contact', label: 'Contact' },
+        { href: '#home', label: t('nav.home') },
+        { href: '#services', label: t('nav.expertises') },
+        { href: '#team', label: t('nav.team') },
+        { href: '#blog', label: t('nav.blog') },
+        { href: '#contact', label: t('nav.contact') },
     ];
 
     const scrollToTop = () => {
@@ -134,7 +152,26 @@ const Header: React.FC = () => {
                             {item.label}
                         </button>
                     ))}
-                    <ThemeToggle />
+
+                    {/* Бургер для переключателей */}
+                    <div className="relative">
+                        <div
+                            className={`burger-menu lg:flex hidden ${isSettingsOpen ? 'open' : ''}`}
+                            onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+                        >
+                            <div className="burger-menu-line-1"></div>
+                            <div className="burger-menu-line-2"></div>
+                            <div className="burger-menu-line-3"></div>
+                        </div>
+
+                        {/* Выпадающее меню с переключателями */}
+                        {isSettingsOpen && (
+                            <div className="absolute top-full right-0 mt-2 p-4 bg-[var(--bg-primary)] border border-[var(--bg-secondary)] rounded-lg shadow-lg z-20 flex gap-3">
+                                <ThemeToggle />
+                                <LanguageToggle />
+                            </div>
+                        )}
+                    </div>
                 </nav>
 
                 {/* Мобильное меню */}
@@ -153,8 +190,9 @@ const Header: React.FC = () => {
                                 {item.label}
                             </button>
                         ))}
-                        <div className="mobile-nav-item flex justify-center">
+                        <div className="mobile-nav-item flex justify-center gap-2">
                             <ThemeToggle />
+                            <LanguageToggle />
                         </div>
                     </div>
                 </div>

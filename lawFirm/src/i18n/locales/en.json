@@ -1,0 +1,147 @@
+﻿{
+  "nav": {
+    "home": "Home",
+    "expertises": "Expertises",
+    "team": "Team",
+    "blog": "Blog",
+    "contact": "Contact"
+  },
+  "hero": {
+    "title": "Company Name",
+    "subtitle": "Law Firm",
+    "slogan": "Company Slogan"
+  },
+  "services": {
+    "title": "Our Expertises",
+    "accentText": "Expert Legal Solutions",
+    "seeAll": "See all expertises",
+    "details": "Details",
+    "hero": {
+      "title": "Our Services",
+      "accentText": "Expert Legal Solutions"
+    },
+    "page": {
+      "title": "our",
+      "accent": "expertises"
+    },
+    "whatWeOffer": "What we offer:",
+    "getConsultation": "get consultation",
+    "section": {
+      "title": {
+        "part1": "our",
+        "part2": "expertises"
+      },
+      "seeAll": "see all expertises",
+      "details": "Details"
+    }
+  },
+  "blog": {
+    "hero": {
+      "title": "Our Blog",
+      "accentText": "Latest Legal Insights"
+    },
+    "page": {
+      "title": "all",
+      "accent": "blog posts"
+    },
+    "readMore": "read more",
+    "section": {
+      "title": "latest",
+      "accent": "blog posts"
+    },
+    "seeOurBlog": "see our blog"
+  },
+  "team": {
+    "hero": {
+      "title": "Our Team",
+      "subtitle": "Professional Lawyers",
+      "accentText": "Meet Our Experts"
+    },
+    "page": {
+      "title": "meet our",
+      "accent": "team"
+    },
+    "specialization": "Specialization:",
+    "section": {
+      "title": {
+        "part1": "our",
+        "part2": "team"
+      },
+      "seeAll": "see all the team"
+    }
+  },
+  "about": {
+    "title": {
+      "part1": "who",
+      "part2": "we are"
+    }
+  },
+  "contact": {
+    "title": {
+      "part1": "get a",
+      "part2": "consultation"
+    },
+    "description": {
+      "part1": "Leave a request and our lawyer will contact you within",
+      "part2": "30 minutes",
+      "part3": "for a free consultation."
+    },
+    "phone": "Phone",
+    "email": "Email",
+    "workHours": "Working Hours",
+    "workDays": "Mon-Fri: 9:00-18:00",
+    "weekend": "Sat: 10:00-16:00",
+    "form": {
+      "name": "Name",
+      "phone": "Phone",
+      "email": "Email",
+      "service": "Service of interest",
+      "message": "Message"
+    },
+    "placeholders": {
+      "name": "Your name",
+      "phone": "+7 (___) ___-__-__",
+      "email": "your@email.com",
+      "service": "Choose service",
+      "message": "Describe your situation..."
+    },
+    "submit": "get consultation",
+    "privacy": {
+      "part1": "By clicking the button, you agree to the",
+      "part2": "privacy policy"
+    },
+    "errors": {
+      "required": "This field is required",
+      "minLength": "Minimum length: {{length}} characters",
+      "email": "Enter valid email",
+      "phone": "Enter valid phone number"
+    },
+    "successMessage": "Form successfully submitted!"
+  },
+  "stats": {
+    "title": {
+      "part1": "key",
+      "part2": "figures"
+    }
+  },
+  "reviews": {
+    "title": {
+      "part1": "our",
+      "part2": "clients"
+    }
+  },
+  "theme": {
+    "switchToLight": "Switch to light theme",
+    "switchToDark": "Switch to dark theme"
+  },
+  "language": {
+    "switchToRussian": "Switch to Russian",
+    "switchToEnglish": "Switch to English"
+  },
+  "footer": {
+    "companySlogan": "Company Slogan",
+    "citiesAndOffices": "Cities and offices",
+    "socialNetworks": "Social networks",
+    "copyright": "All rights reserved"
+  }
+}

@@ -7,8 +7,11 @@ import TeamSection from '../components/sections/TeamSection';
 import ReviewsSection from '../components/sections/ReviewsSection';
 import BlogSection from '../components/sections/BlogSection';
 import ContactSection from '../components/sections/ContactSection';
+import { useI18n } from '../hooks/useI18n';
 
 const HomePage: React.FC = () => {
+    const { t } = useI18n();
+
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
@@ -17,9 +20,9 @@ const HomePage: React.FC = () => {
         <>
             <HeroSection
                 id="hero"
-                title="CompanyName"
-                subtitle="Law Firm"
-                accentText="Company Slogan"
+                title={t('hero.title')}
+                subtitle={t('hero.subtitle')}
+                accentText={t('hero.slogan')}
                 imageUrl="/heros/law.jpg"
                 nextSectionId="about"
                 imagePosition="right"
