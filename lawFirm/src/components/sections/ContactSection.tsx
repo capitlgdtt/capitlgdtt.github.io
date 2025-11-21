@@ -77,7 +77,6 @@ const ContactSection: React.FC = () => {
             sessionStorage.removeItem('selectedService');
         }
 
-        // Слушаем кастомные события
         window.addEventListener('serviceSelected', handleServiceSelection as EventListener);
 
         return () => {
@@ -183,7 +182,7 @@ const ContactSection: React.FC = () => {
 
         if (validateForm()) {
             console.log("Форма отправлена:", formData);
-            // Здесь можно добавить отправку на сервер
+            // отправка на сервер?
             alert(t('contact.successMessage'));
 
             // Сброс формы
@@ -247,13 +246,13 @@ const ContactSection: React.FC = () => {
                             : "translate-y-12 opacity-0"
                     }`}
                 >
-                    <h2 className="text-[5rem] md:text-[7rem] font-syne uppercase font-semibold leading-tight break-words">
+                    <h2 className="text-[2.5rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[7rem] font-syne uppercase font-semibold leading-tight break-words">
                         {t('contact.title.part1')} <span className="text-[var(--accent)]">{t('contact.title.part2')}</span>
                     </h2>
                 </div>
 
                 <div
-                    className={`grid grid-cols-1 lg:grid-cols-2 gap-16 transition-opacity duration-1000 ${
+                    className={`grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 lg:gap-16 transition-opacity duration-1000 ${
                         visible ? "opacity-100" : "opacity-0"
                     }`}
                 >
@@ -268,7 +267,7 @@ const ContactSection: React.FC = () => {
                         </p>
 
                         <div className="flex items-start">
-                            <div className="p-3 mr-5 bg-[var(--accent)] rounded-2xl text-[var(--bg-primary)] text-2xl">
+                            <div className="p-3 mr-4 md:mr-5 bg-[var(--accent)] rounded-2xl text-[var(--bg-primary)] text-xl md:text-2xl">
                                 <img
                                     src="/icons/phone.png"
                                     alt={t('contact.phone')}
@@ -336,14 +335,14 @@ const ContactSection: React.FC = () => {
 
                     {/* Правая колонка — форма */}
                     <div
-                        className={`relative p-10 border transition-all duration-500 ${
+                        className={`relative p-6 md:p-8 lg:p-10 border transition-all duration-500 ${
                             theme === "dark"
                                 ? "border-white/20 bg-white/5"
                                 : "border-black/10 bg-white/60 backdrop-blur-md"
                         }`}
                     >
                         <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                                 <div>
                                     <label className="block text-sm mb-2 font-medium">
                                         {t('contact.form.name')} *

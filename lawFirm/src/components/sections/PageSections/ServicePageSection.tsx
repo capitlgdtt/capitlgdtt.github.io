@@ -261,13 +261,13 @@ const ServicesPageSection: React.FC = () => {
                             : "translate-y-12 opacity-0"
                     }`}
                 >
-                    <h2 className="text-[5rem] md:text-[7rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
+                    <h2 className="text-[2.5rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[7rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
                         {t('services.page.title')} <span className="text-[var(--accent)]">{t('services.page.accent')}</span>
                     </h2>
                 </div>
 
                 {/* Список услуг в строчном формате */}
-                <div className="space-y-8">
+                <div className="space-y-6 sm:space-y-8">
                     {currentServices.map((service, index) => (
                         <div
                             key={service.id}
@@ -284,7 +284,7 @@ const ServicesPageSection: React.FC = () => {
                         >
                             <div className="flex flex-col lg:flex-row">
                                 {/* Изображение */}
-                                <div className="lg:w-1/3 h-64 lg:h-auto">
+                                <div className="lg:w-1/3 h-56 sm:h-64 lg:h-auto">
                                     <img
                                         src={service.image}
                                         alt={service.title}
@@ -297,7 +297,7 @@ const ServicesPageSection: React.FC = () => {
                                 </div>
 
                                 {/* Контент */}
-                                <div className="lg:w-2/3 p-8 flex flex-col justify-between">
+                                <div className="lg:w-2/3 p-6 sm:p-8 flex flex-col justify-between">
                                     <div>
                                         <div className="flex items-start justify-between mb-6">
                                             <div>

@@ -72,7 +72,7 @@ const StatsSection: React.FC = () => {
                         visible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
                     }`}
                 >
-                    <h2 className="text-[5rem] md:text-[7rem] font-syne uppercase font-semibold leading-tight">
+                    <h2 className="text-[2.5rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[7rem] font-syne uppercase font-semibold leading-tight break-words">
                         {t('stats.title.part1')} <span className="text-[var(--accent)]">{t('stats.title.part2')}</span>
                     </h2>
                 </div>
@@ -85,11 +85,11 @@ const StatsSection: React.FC = () => {
                 >
                     {stats.map((s, i) => (
                         <div key={i} className="text-center">
-                            <div className="text-[3rem] md:text-[4rem] font-bold text-[var(--accent)]">
+                            <div className="text-[2rem] sm:text-[2.5rem] md:text-[3rem] lg:text-[4rem] font-bold text-[var(--accent)]">
                                 {animatedValues[i] ?? 0}
                                 {s.hasPlus && "+"}
                             </div>
-                            <div className="text-[var(--text-secondary)] text-lg font-medium mt-1">
+                            <div className="text-[var(--text-secondary)] text-sm sm:text-base md:text-lg font-medium mt-1">
                                 {s.label}
                             </div>
                         </div>

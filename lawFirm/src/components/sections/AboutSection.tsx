@@ -46,7 +46,7 @@ const AboutSection: React.FC = () => {
                         visible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
                     }`}
                 >
-                    <h2 className="text-[5rem] md:text-[7rem] font-syne uppercase font-semibold leading-tight">
+                    <h2 className="text-[2.5rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[7rem] font-syne uppercase font-semibold leading-tight break-words">
                         {t('about.title.part1')} <span className="text-[var(--accent)]">{t('about.title.part2')}</span>
                     </h2>
                 </div>
@@ -57,7 +57,7 @@ const AboutSection: React.FC = () => {
                             key={i}
                             className={`transition-all duration-1000 delay-${i * 200} ${
                                 visible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
-                            } max-w-[90%] mx-auto text-center md:text-left`}
+                            } max-w-full md:max-w-[90%] mx-auto text-center md:text-left text-base sm:text-lg md:text-xl leading-relaxed`}
                         >
                             {text}
                         </p>

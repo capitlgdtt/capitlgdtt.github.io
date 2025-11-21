@@ -121,7 +121,7 @@ const TeamSection: React.FC = () => {
                             : "translate-y-12 opacity-0"
                     }`}
                 >
-                    <h2 className="text-[5rem] md:text-[7rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
+                    <h2 className="text-[2.5rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[7rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
                         {t('team.section.title.part1')} <span className="text-[var(--accent)]">{t('team.section.title.part2')}</span>
                     </h2>
                 </div>
@@ -137,21 +137,21 @@ const TeamSection: React.FC = () => {
                         >
                             <div className="flex items-center justify-between py-8 cursor-pointer">
                                 {/* Информация о человеке */}
-                                <div className="flex items-center space-x-12">
+                                <div className="flex items-center space-x-6 sm:space-x-8 md:space-x-12">
                                     <div className="text-4xl font-syne font-bold text-[var(--accent)] opacity-60 w-16 hidden md:block">
                                         {String(member.id).padStart(2, "0")}
                                     </div>
                                     <div className="infos-team-member">
-                                        <div className="sub-heading text-3xl font-semibold font-syne">
+                                        <div className="sub-heading text-xl sm:text-2xl md:text-3xl font-semibold font-syne">
                                             {member.name}
                                         </div>
-                                        <div className="wrapper-job-title text-[var(--text-secondary)] text-xl mt-2">
+                                        <div className="wrapper-job-title text-[var(--text-secondary)] text-base sm:text-lg md:text-xl mt-2">
                                             <p>{member.role}</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Фото (появляется при наведении) */}
+                                {/* Фото */}
                                 <div className={`absolute left-1/2 top-1/2 transform -translate-y-1/2 transition-all duration-500 ease-out z-10 ${
                                     hoveredMember === member.id
                                         ? "opacity-100 scale-100 rotate-0 translate-x-0"
@@ -183,7 +183,6 @@ const TeamSection: React.FC = () => {
                     ))}
                 </div>
 
-                {/* Кнопка "see all the team" */}
                 {/* Кнопка "see all the team" */}
                 <div
                     className={`transition-all duration-1000 delay-700 mt-8 ${

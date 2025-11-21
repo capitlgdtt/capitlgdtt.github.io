@@ -138,26 +138,26 @@ const ServicesSection: React.FC = () => {
                             : "translate-y-12 opacity-0"
                     }`}
                 >
-                    <h2 className="text-[5rem] md:text-[7rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
+                    <h2 className="text-[2.5rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[7rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
                         {t('services.section.title.part1')} <span className="text-[var(--accent)]">{t('services.section.title.part2')}</span>
                     </h2>
                 </div>
 
                 {/* Сетка карточек */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12">
-                    {services.map((service, index) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 md:gap-x-8 lg:gap-x-12 gap-y-8 md:gap-y-12">
+                    {services.map((service) => (
                         <div
                             key={service.id}
-                            className={`relative p-8 bg-[var(--bg-secondary)] text-[var(--text-primary)] transition-all duration-400 ease-out 
-                                       flex flex-col justify-between h-[400px] md:h-[420px] shadow-lg
-                                       hover:scale-105 hover:shadow-xl cursor-pointer
+                            className={`relative p-6 sm:p-8 bg-[var(--bg-secondary)] text-[var(--text-primary)] transition-all duration-400 ease-out 
+                                        flex flex-col justify-between h-[350px] sm:h-[380px] md:h-[420px] shadow-lg
+                                        hover:scale-105 hover:shadow-xl cursor-pointer'
                             ${
                                 visible
                                     ? "opacity-100 translate-y-0"
                                     : "opacity-0 translate-y-20"
                             }`}
                             style={{
-                                transitionDelay: `${index * 100}ms`,
+                                transitionDelay: `100ms`,
                             }}
                         >
                             <div>
@@ -214,7 +214,7 @@ const ServicesSection: React.FC = () => {
                 `}
             </style>
 
-            {/* Кнопка "see all expertises" */}
+            {/* Кнопка see all*/}
             <div
                 className={`transition-all duration-1000 delay-700 mt-12! ${
                     visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"

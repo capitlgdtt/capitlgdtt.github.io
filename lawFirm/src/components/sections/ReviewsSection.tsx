@@ -219,7 +219,7 @@ const ReviewsSection: React.FC = () => {
                             : "translate-y-12 opacity-0"
                     }`}
                 >
-                    <h2 className="text-[5rem] md:text-[7rem] font-syne uppercase font-semibold leading-tight">
+                    <h2 className="text-[2.5rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[7rem] font-syne uppercase font-semibold leading-tight break-words">
                         {t('reviews.title.part1')} <span className="text-[var(--accent)]">{t('reviews.title.part2')}</span>
                     </h2>
                 </div>
@@ -228,7 +228,7 @@ const ReviewsSection: React.FC = () => {
                 <div className="relative overflow-hidden">
 
                     {/* Первый ряд (движется вправо) */}
-                    <div className="flex gap-8 mb-8">
+                    <div className="flex gap-4 sm:gap-6 md:gap-8 mb-6 sm:mb-8">
                         <div
                             className="flex gap-8"
                             style={{
@@ -239,8 +239,8 @@ const ReviewsSection: React.FC = () => {
                             {[...reviews, ...reviews].map((review, index) => (
                                 <div
                                     key={`right-${review.id}-${index}`}
-                                    className="w-80 p-6 bg-[var(--bg-secondary)] text-[var(--text-primary)] transition-all duration-400 ease-out
-                                             flex flex-col justify-between h-64 shadow-lg hover:scale-105 hover:shadow-xl cursor-pointer flex-shrink-0"
+                                    className="w-64 sm:w-72 md:w-80 p-4 sm:p-6 bg-[var(--bg-secondary)] text-[var(--text-primary)] transition-all duration-400 ease-out
+                                               flex flex-col justify-between h-56 sm:h-60 md:h-64 shadow-lg hover:scale-105 hover:shadow-xl cursor-pointer flex-shrink-0"
                                 >
                                     <div className="wrapper-icons-testimonial mb-4">
                                         {renderStars(review.rating)}
@@ -263,7 +263,7 @@ const ReviewsSection: React.FC = () => {
                     </div>
 
                     {/* Второй ряд (движется влево) */}
-                    <div className="flex gap-8 justify-end">
+                    <div className="flex gap-4 sm:gap-6 md:gap-8 justify-end">
                         <div
                             className="flex gap-8"
                             style={{
@@ -274,8 +274,8 @@ const ReviewsSection: React.FC = () => {
                             {[...reviews, ...reviews].map((review, index) => (
                                 <div
                                     key={`left-${review.id}-${index}`}
-                                    className="w-80 p-6 bg-[var(--bg-secondary)] text-[var(--text-primary)] transition-all duration-400 ease-out
-                         flex flex-col justify-between h-64 shadow-lg hover:scale-105 hover:shadow-xl cursor-pointer flex-shrink-0"
+                                    className="w-64 sm:w-72 md:w-80 p-4 sm:p-6 bg-[var(--bg-secondary)] text-[var(--text-primary)] transition-all duration-400 ease-out
+                                               flex flex-col justify-between h-56 sm:h-60 md:h-64 shadow-lg hover:scale-105 hover:shadow-xl cursor-pointer flex-shrink-0"
                                 >
                                     <div className="wrapper-icons-testimonial mb-4">
                                         {renderStars(review.rating)}

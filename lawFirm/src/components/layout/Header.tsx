@@ -142,7 +142,7 @@ const Header: React.FC = () => {
                 </div>
 
                 {/* Десктоп меню */}
-                <nav className="hidden lg:flex gap-12 items-center">
+                <nav className="hidden lg:flex gap-8 xl:gap-12 items-center">
                     {navItems.map((item) => (
                         <button
                             key={item.href}

@@ -91,7 +91,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         >
             {/* Изображение */}
             <div
-                className={`absolute ${imagePosition === "right" ? "right-0" : "left-0"} top-0 h-full w-1/3 flex items-center justify-center transition-all duration-[1800ms] transform ${
+                className={`absolute ${imagePosition === "right" ? "right-0" : "left-0"} top-0 h-full w-4/7 sm:w-1/3 md:w-1/3 flex items-center justify-center transition-all duration-[1800ms] transform ${
                     visible
                         ? "translate-x-0 opacity-100 scale-100 rotate-0"
                         : imagePosition === "right"
@@ -131,7 +131,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
             >
                 <div className="overflow-hidden mb-4">
                     <h1
-                        className={`text-[5rem] md:text-[7rem] font-syne uppercase font-semibold transition-transform duration-700 ${
+                        className={`text-[2.5rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[7rem] font-syne uppercase font-semibold transition-transform duration-700 break-words leading-tight ${
                             visible ? "translate-y-0" : "translate-y-full"
                         }`}
                     >
@@ -142,7 +142,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
                 {subtitle && (
                     <div className="overflow-hidden mb-4">
                         <h2
-                            className={`text-[5rem] md:text-[7rem] font-syne uppercase font-normal text-right transition-transform duration-700 delay-150 ${
+                            className={`text-[2.5rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[7rem] font-syne uppercase font-normal text-right transition-transform duration-700 delay-150 break-words leading-tight ${
                                 visible ? "translate-y-0" : "translate-y-full"
                             }`}
                         >
@@ -154,7 +154,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
                 {accentText && (
                     <div className="overflow-hidden mb-8">
                         <h3
-                            className={`text-[3rem] md:text-[4rem] font-syne uppercase text-[var(--accent)] transition-transform duration-700 delay-300 ${
+                            className={`text-[1.5rem] sm:text-[2rem] md:text-[3rem] lg:text-[4rem] font-syne uppercase text-[var(--accent)] transition-transform duration-700 delay-300 break-words leading-tight ${
                                 visible ? "translate-y-0" : "translate-y-full"
                             }`}
                         >

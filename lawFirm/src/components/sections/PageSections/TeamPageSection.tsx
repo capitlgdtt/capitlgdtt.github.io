@@ -208,14 +208,14 @@ const TeamPageSection: React.FC = () => {
                             : "translate-y-12 opacity-0"
                     }`}
                 >
-                    <h2 className="text-[5rem] md:text-[7rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
+                    <h2 className="text-[2.5rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[7rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
                         {t('team.page.title')} <span className="text-[var(--accent)]">{t('team.page.accent')}</span>
                     </h2>
                 </div>
 
                 {/* Сетка карточек команды */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {currentMembers.map((member, index) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                    {currentMembers.map((member) => (
                         <div
                             key={member.id}
                             className={`relative group transition-all duration-700 ease-out ${
@@ -224,17 +224,17 @@ const TeamPageSection: React.FC = () => {
                                     : "opacity-0 translate-y-8"
                             }`}
                             style={{
-                                transitionDelay: `${index * 100}ms`
+                                transitionDelay: `100ms`
                             }}
                         >
                             {/* Карточка */}
                             <div className="border rounded-none overflow-hidden h-full flex flex-col bg-[var(--bg-secondary)]/30 backdrop-blur-sm">
                                 {/* Изображение */}
-                                <div className="relative h-80 overflow-hidden">
+                                <div className="relative h-64 sm:h-72 md:h-80 overflow-hidden">
                                     <img
                                         src={member.image}
                                         alt={member.name}
-                                        className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${
+                                        className={`w-full h-full object-cover object-[50%_25%] transition-all duration-500 group-hover:scale-105 ${
                                             theme === "dark"
                                                 ? "brightness-50 contrast-110 saturate-90"
                                                 : "brightness-90 contrast-95 saturate-100"
@@ -246,7 +246,7 @@ const TeamPageSection: React.FC = () => {
                                 </div>
 
                                 {/* Контент */}
-                                <div className="p-6 flex-1 flex flex-col">
+                                <div className="p-4 sm:p-6 flex-1 flex flex-col">
                                     {/* Основная информация */}
                                     <div className="mb-4">
                                         <h3 className="text-2xl font-syne font-semibold mb-2">

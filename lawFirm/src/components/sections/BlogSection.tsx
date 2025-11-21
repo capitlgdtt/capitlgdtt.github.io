@@ -207,7 +207,7 @@ const BlogSection: React.FC = () => {
                                 : "translate-y-12 opacity-0"
                         }`}
                     >
-                        <h2 className="text-[5rem] md:text-[7rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
+                        <h2 className="text-[2.5rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[7rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
                             {t('blog.section.title')} <span className="text-[var(--accent)]">{t('blog.section.accent')}</span>
                         </h2>
                     </div>
@@ -257,7 +257,7 @@ const BlogSection: React.FC = () => {
                 <div className="overflow-hidden">
                     <div
                         ref={postsContainerRef}
-                        className="flex transition-transform duration-500 ease-out gap-8"
+                        className="flex transition-transform duration-500 ease-out gap-6 sm:gap-8"
                         style={{
                             transform: `translateX(calc(-${currentIndex * (100 / postsPerView)}% - ${currentIndex * (32 / postsPerView)}px))`
                         }}

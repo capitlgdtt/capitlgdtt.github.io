@@ -182,13 +182,13 @@ const BlogPageSection: React.FC = () => {
                             : "translate-y-12 opacity-0"
                     }`}
                 >
-                    <h2 className="text-[5rem] md:text-[7rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
+                    <h2 className="text-[2.5rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[7rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
                         {t('blog.page.title')} <span className="text-[var(--accent)]">{t('blog.page.accent')}</span>
                     </h2>
                 </div>
 
                 {/* Сетка постов */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                     {currentPosts.map((post, index) => (
                         <article
                             key={post.id}
