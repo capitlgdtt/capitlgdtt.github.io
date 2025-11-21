@@ -183,7 +183,8 @@ const ReviewsSection: React.FC = () => {
 
     // Рассчитываем смещение для анимации
     const getScrollOffset = () => {
-        const maxOffset = 15;
+        const isMobile = window.innerWidth < 768;
+        const maxOffset = isMobile ? 35 : 15;
         return scrollProgress * maxOffset;
     };
 

@@ -300,15 +300,15 @@ const ServicesPageSection: React.FC = () => {
                                 <div className="lg:w-2/3 p-6 sm:p-8 flex flex-col justify-between">
                                     <div>
                                         <div className="flex items-start justify-between mb-6">
-                                            <div>
-                                                <h3 className="text-3xl font-syne font-semibold mb-2">
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="text-xl sm:text-2xl md:text-3xl font-syne font-semibold mb-2">
                                                     {service.title}
                                                 </h3>
-                                                <p className="text-[var(--text-secondary)] text-lg leading-relaxed mb-4">
+                                                <p className="text-[var(--text-secondary)] text-base sm:text-lg leading-relaxed mb-4">
                                                     {service.description}
                                                 </p>
                                             </div>
-                                            <div className="text-[var(--accent)] text-4xl font-syne font-bold opacity-40 select-none ml-4">
+                                            <div className="text-[var(--accent)] text-4xl font-syne font-bold opacity-40 select-none ml-4 flex-shrink-0 w-12 text-right">
                                                 {String(service.id).padStart(2, "0")}
                                             </div>
                                         </div>

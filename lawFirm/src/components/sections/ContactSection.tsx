@@ -246,7 +246,7 @@ const ContactSection: React.FC = () => {
                             : "translate-y-12 opacity-0"
                     }`}
                 >
-                    <h2 className="text-[2.5rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[7rem] font-syne uppercase font-semibold leading-tight break-words">
+                    <h2 className="text-[2.3rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[7rem] font-syne uppercase font-semibold leading-tight">
                         {t('contact.title.part1')} <span className="text-[var(--accent)]">{t('contact.title.part2')}</span>
                     </h2>
                 </div>
