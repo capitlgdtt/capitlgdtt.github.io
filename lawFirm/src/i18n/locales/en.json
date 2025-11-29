@@ -49,7 +49,9 @@
       "title": "latest",
       "accent": "blog posts"
     },
-    "seeOurBlog": "see our blog"
+    "seeOurBlog": "see our blog",
+    "backToBlog": "back to blog",
+    "postNotFound": "Post not found"
   },
   "team": {
     "hero": {

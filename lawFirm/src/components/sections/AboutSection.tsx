@@ -1,5 +1,6 @@
 ﻿import React, { useEffect, useRef, useState } from "react";
 import {useI18n} from "../../hooks/useI18n.ts";
+import DecorativeLine from "../common/DecorativeLine.tsx";
 
 const AboutSection: React.FC = () => {
     const [visible, setVisible] = useState(false);
@@ -66,16 +67,9 @@ const AboutSection: React.FC = () => {
             </div>
 
             {/* линия снизу */}
-            <div
-                className={`absolute bottom-0 h-[2px] bg-[var(--accent)] transition-all duration-1000 ${
-                    visible ? "w-full scale-x-100" : "w-0 scale-x-0"
-                }`}
-                style={{
-                    left: "var(--container-padding)",
-                    width: "calc(100% - 2 * var(--container-padding))",
-                    transformOrigin: "left center",
-                    transitionTimingFunction: "ease-out",
-                }}
+            <DecorativeLine
+                visible={visible}
+                color="var(--accent)"
             />
         </section>
     );

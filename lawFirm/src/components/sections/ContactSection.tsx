@@ -1,5 +1,6 @@
 ﻿import React, { useState, useEffect, useRef } from "react";
 import {useI18n} from "../../hooks/useI18n.ts";
+import DecorativeLine from "../common/DecorativeLine.tsx";
 
 interface FormErrors {
     name?: string;
@@ -246,7 +247,7 @@ const ContactSection: React.FC = () => {
                             : "translate-y-12 opacity-0"
                     }`}
                 >
-                    <h2 className="text-[2.3rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[7rem] font-syne uppercase font-semibold leading-tight">
+                    <h2 className="text-[2.2rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[7rem] font-syne uppercase font-semibold leading-tight">
                         {t('contact.title.part1')} <span className="text-[var(--accent)]">{t('contact.title.part2')}</span>
                     </h2>
                 </div>
@@ -497,17 +498,7 @@ const ContactSection: React.FC = () => {
             </div>
 
             {/* Нижняя линия */}
-            <div
-                className={`absolute bottom-0 h-[2px] bg-[var(--text-secondary)] transition-all duration-1000 delay-1000 ${
-                    visible ? "w-full scale-x-100" : "w-0 scale-x-0"
-                }`}
-                style={{
-                    left: "var(--container-padding)",
-                    width: "calc(100% - 2 * var(--container-padding))",
-                    transformOrigin: "left center",
-                    transitionTimingFunction: "ease-out",
-                }}
-            />
+            <DecorativeLine visible={visible} />
         </section>
     );
 };

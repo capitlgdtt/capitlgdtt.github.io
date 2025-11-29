@@ -1,5 +1,6 @@
 ﻿import React, { useEffect, useRef, useState } from "react";
 import { useI18n } from "../../hooks/useI18n.ts";
+import DecorativeLine from "../common/DecorativeLine.tsx";
 
 interface Review {
     id: number;
@@ -225,7 +226,7 @@ const ReviewsSection: React.FC = () => {
                     </h2>
                 </div>
 
-                {/* Бесконечная прокрутка отзывов */}
+                {/* Прокрутка отзывов */}
                 <div className="relative overflow-hidden">
 
                     {/* Первый ряд (движется вправо) */}
@@ -301,17 +302,7 @@ const ReviewsSection: React.FC = () => {
             </div>
 
             {/* Нижняя линия */}
-            <div
-                className={`absolute bottom-0 h-[2px] bg-[var(--text-secondary)] transition-all duration-1000 delay-1000 ${
-                    visible ? "w-full scale-x-100" : "w-0 scale-x-0"
-                }`}
-                style={{
-                    left: "var(--container-padding)",
-                    width: "calc(100% - 2 * var(--container-padding))",
-                    transformOrigin: "left center",
-                    transitionTimingFunction: "ease-out",
-                }}
-            />
+            <DecorativeLine visible={visible} />
         </section>
     );
 };

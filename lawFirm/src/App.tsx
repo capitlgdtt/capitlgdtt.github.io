@@ -6,6 +6,7 @@ import ServicesPage from './pages/ServicesPage';
 import TeamPage from './pages/TeamPage';
 import BlogPage from './pages/BlogPage';
 import './i18n';
+import BlogPostPage from "./components/sections/PageSections/BlogPostPage.tsx";
 
 const App: React.FC = () => {
     return (
@@ -16,6 +17,7 @@ const App: React.FC = () => {
                     <Route path="/services" element={<ServicesPage />} />
                     <Route path="/team" element={<TeamPage />} />
                     <Route path="/blog" element={<BlogPage />} />
+                    <Route path="/blog/:slug" element={<BlogPostPage />} />
                 </Routes>
             </AppShell>
         </Router>

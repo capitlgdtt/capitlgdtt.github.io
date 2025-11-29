@@ -131,7 +131,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
             >
                 <div className="overflow-hidden mb-4">
                     <h1
-                        className={`text-[2.5rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[7rem] font-syne uppercase font-semibold transition-transform duration-700 break-words leading-tight ${
+                        className={`text-[2.5rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[7rem] font-syne uppercase font-semibold transition-transform duration-700 break-words leading-tight tracking-tight ${
                             visible ? "translate-y-0" : "translate-y-full"
                         }`}
                     >
@@ -142,19 +142,18 @@ const HeroSection: React.FC<HeroSectionProps> = ({
                 {subtitle && (
                     <div className="overflow-hidden mb-4">
                         <h2
-                            className={`text-[2.5rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[7rem] font-syne uppercase font-normal text-right transition-transform duration-700 delay-150 break-words leading-tight ${
+                            className={`text-[2.5rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[5rem] font-syne uppercase font-normal text-right transition-transform duration-700 delay-150 break-words leading-tight tracking-tight md:break-normal md:hyphens-none ${
                                 visible ? "translate-y-0" : "translate-y-full"
                             }`}
-                        >
-                            {subtitle}
-                        </h2>
+                            dangerouslySetInnerHTML={{ __html: subtitle }}
+                        />
                     </div>
                 )}
 
                 {accentText && (
                     <div className="overflow-hidden mb-8">
                         <h3
-                            className={`text-[1.5rem] sm:text-[2rem] md:text-[3rem] lg:text-[4rem] font-syne uppercase text-[var(--accent)] transition-transform duration-700 delay-300 break-words leading-tight ${
+                            className={`text-[1.5rem] sm:text-[2rem] md:text-[3rem] lg:text-[4rem] font-syne uppercase text-[var(--accent)] transition-transform duration-700 delay-300 break-words leading-tight tracking-tight ${
                                 visible ? "translate-y-0" : "translate-y-full"
                             }`}
                         >
