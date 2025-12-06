@@ -1,6 +1,7 @@
 ﻿import React, { useState } from 'react';
 import { useI18n } from "../../../hooks/useI18n.ts";
 import { useAdminAuth } from '../../../hooks/useAdminAuth.ts';
+import {useNavigate} from "react-router-dom";
 
 const AdminLogin: React.FC = () => {
     const [username, setUsername] = useState('');
@@ -8,6 +9,7 @@ const AdminLogin: React.FC = () => {
     const [error, setError] = useState('');
     const { t } = useI18n();
     const { login } = useAdminAuth();
+    const navigate = useNavigate();
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
@@ -21,7 +23,9 @@ const AdminLogin: React.FC = () => {
         const success = login(username, password);
 
         if (success) {
-            window.location.href = '/admin';
+            setTimeout(() => {
+                navigate('/admin');
+            }, 100);
         } else {
             setError(t('admin.login.errors.invalid'));
         }
