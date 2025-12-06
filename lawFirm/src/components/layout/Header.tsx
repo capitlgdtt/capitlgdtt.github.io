@@ -3,6 +3,7 @@ import ThemeToggle from './ThemeToggle';
 import { useNavigate } from 'react-router-dom';
 import LanguageToggle from "./LanguageToggle.tsx";
 import { useI18n } from "../../hooks/useI18n.ts";
+import AdminButton from "./AdminButton.tsx";
 
 const Header: React.FC = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -169,6 +170,7 @@ const Header: React.FC = () => {
                             <div className="absolute top-full right-0 mt-2 p-4 bg-[var(--bg-primary)] border border-[var(--bg-secondary)] rounded-lg shadow-lg z-20 flex gap-3">
                                 <ThemeToggle />
                                 <LanguageToggle />
+                                <AdminButton />
                             </div>
                         )}
                     </div>
@@ -193,6 +195,7 @@ const Header: React.FC = () => {
                         <div className="mobile-nav-item flex justify-center gap-2">
                             <ThemeToggle />
                             <LanguageToggle />
+                            <AdminButton />
                         </div>
                     </div>
                 </div>

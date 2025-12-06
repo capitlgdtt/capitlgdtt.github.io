@@ -42,7 +42,7 @@ const AdminLogin: React.FC = () => {
                     </div>
                 )}
 
-                <form onSubmit={handleLogin} className="space-y-6">
+                <form onSubmit={handleLogin} className="space-y-6 px-6">
                     <div>
                         <input
                             type="text"
