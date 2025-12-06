@@ -6,7 +6,7 @@ import { createApplication } from "../../services/applicationService.ts";
 import { Link } from "react-router-dom";
 import { useTheme } from "../../hooks/useTheme.ts";
 import { useVisibility } from "../../hooks/useVisibility.ts";
-import {useForm} from "../../hooks/useForm.tsx";
+import {useForm} from "../../hooks/useForm.ts";
 
 interface FormData {
     name: string;
