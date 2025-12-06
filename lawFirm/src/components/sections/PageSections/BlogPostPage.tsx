@@ -2,35 +2,24 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useI18n } from "../../../hooks/useI18n.ts";
 import DecorativeLine from "../../common/DecorativeLine.tsx";
-import {blogPosts} from "../../../data/blogPosts.ts";
+import {getPostBySlug, translateCategory, formatDate} from "../../../services/blogService.ts";
+import {useTheme} from "../../../hooks/useTheme.ts";
 
 const BlogPostPage: React.FC = () => {
     const { slug } = useParams();
     const navigate = useNavigate();
     const { t, currentLanguage } = useI18n();
     const [visible, setVisible] = useState(false);
-    const [theme, setTheme] = useState<"dark" | "light">("dark");
 
-    const currentPosts = blogPosts[currentLanguage] || blogPosts.en;
-    const post = currentPosts.find(p => p.slug === slug);
+    const post = slug ? getPostBySlug(slug) : undefined;
+    const languageKey = currentLanguage as 'en' | 'ru';
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
     // Отслеживание темы
-    useEffect(() => {
-        const currentTheme = document.documentElement.getAttribute("data-theme") || "dark";
-        setTheme(currentTheme as "dark" | "light");
-
-        const observer = new MutationObserver(() => {
-            const t = document.documentElement.getAttribute("data-theme") || "dark";
-            setTheme(t as "dark" | "light");
-        });
-
-        observer.observe(document.documentElement, {
-            attributes: true,
-            attributeFilter: ["data-theme"],
-        });
-
-        return () => observer.disconnect();
-    }, []);
+    const { theme } = useTheme();
 
     useEffect(() => {
         setVisible(true);
@@ -51,6 +40,12 @@ const BlogPostPage: React.FC = () => {
             </div>
         );
     }
+
+    const translation = post.translations[languageKey] || post.translations.en;
+
+    // Переводим категорию и дату
+    const translatedCategory = translateCategory(post.category, languageKey);
+    const formattedDate = formatDate(post.date, languageKey);
 
     return (
         <section
@@ -88,22 +83,22 @@ const BlogPostPage: React.FC = () => {
                 <div className="mb-2">
                     <div className="overflow-hidden mb-6">
                         <h1 className="text-[2rem] sm:text-[3rem] md:text-[4rem] lg:text-[6rem] font-syne uppercase font-semibold leading-tight break-words">
-                            {post.title}
+                            {translation.title}
                         </h1>
                     </div>
 
                     {/* Информация */}
                     <div className="flex items-center space-x-4 text-[var(--text-secondary)] text-lg mb-8">
-                        <span>{post.date}</span>
+                        <span>{formattedDate}</span>
                         <div className="w-2 h-2 rounded-full bg-current"></div>
-                        <span>{post.category}</span>
+                        <span>{translatedCategory}</span>
                     </div>
 
                     {/* Изображение поста */}
                     <div className="relative h-80 sm:h-96 md:h-[500px] mb-8 overflow-hidden rounded-lg">
                         <img
                             src={post.image}
-                            alt={post.title}
+                            alt={translation.title}
                             className={`w-full h-full object-cover transition-all duration-500 ${
                                 theme === "dark"
                                     ? "brightness-50 contrast-110 saturate-90"
@@ -118,7 +113,7 @@ const BlogPostPage: React.FC = () => {
                     <div className="prose prose-lg max-w-none text-[var(--text-primary)]">
                         {/* Краткое описание */}
                         <p className="text-xl text-[var(--text-secondary)] leading-relaxed italic">
-                            {post.excerpt}
+                            {translation.excerpt}
                         </p>
 
                         {/* Линия разделитель */}
@@ -129,8 +124,8 @@ const BlogPostPage: React.FC = () => {
                         {/* Основной контент */}
                         <div className="space-y-6 text-lg leading-relaxed mt-12">
                             <div
-                                className="prose prose-lg max-w-none text-[var(--text-primary)]"
-                                dangerouslySetInnerHTML={{ __html: post.content }}
+                                className="prose prose-lg max-w-none text-[var(--text-primary) tiptap-editor"
+                                dangerouslySetInnerHTML={{ __html: translation.content }}
                             />
                         </div>
                     </div>

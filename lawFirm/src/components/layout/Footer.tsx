@@ -60,7 +60,7 @@ const Footer: React.FC = () => {
 
     return (
         <footer
-            className="bg-[var(--bg-primary)] text-[var(--text-primary)] border-t border-[var(--bg-secondary)] transition-colors duration-300 pb-6"
+            className="bg-[var(--bg-primary)] text-[var(--text-primary)] border-[var(--bg-secondary)] transition-colors duration-300 pb-6"
             style={{ fontFamily: "'Syne', sans-serif" }}
         >
             <div className="container py-16">

@@ -1,121 +1,22 @@
-﻿import React, { useEffect, useRef, useState } from "react";
+﻿import React from "react";
 import { useI18n } from "../../hooks/useI18n.ts";
 import {Link} from "react-router-dom";
 import DecorativeLine from "../common/DecorativeLine.tsx";
-
-interface Service {
-    id: number;
-    title: string;
-    description: string;
-    link?: string;
-}
+import {getServicesForDisplay} from "../../services/serviceService.ts";
+import {useVisibility} from "../../hooks/useVisibility.ts";
+import {useTheme} from "../../hooks/useTheme.ts";
 
 const ServicesSection: React.FC = () => {
-    const [visible, setVisible] = useState(false);
-    const [theme, setTheme] = useState<"dark" | "light">("dark");
-    const ref = useRef<HTMLDivElement>(null);
     const { t, currentLanguage } = useI18n();
 
-    // Константные данные на двух языках
-    const servicesData: Record<string, Service[]> = {
-        en: [
-            {
-                id: 1,
-                title: "Corporate Law",
-                description: "Complete legal support for business, company registration, contract work.",
-            },
-            {
-                id: 2,
-                title: "Tax Law",
-                description: "Tax optimization, defense in tax disputes, consultations.",
-            },
-            {
-                id: 3,
-                title: "Real Estate",
-                description: "Real estate transactions, deal support, dispute resolution.",
-            },
-            {
-                id: 4,
-                title: "Family Law",
-                description: "Divorces, property division, alimony, marriage contracts.",
-            },
-            {
-                id: 5,
-                title: "Inheritance Law",
-                description: "Inheritance registration, will contestation, inheritance disputes.",
-            },
-            {
-                id: 6,
-                title: "Consumer Protection",
-                description: "Compensation for damages, protection from unfair sellers.",
-            },
-        ],
-        ru: [
-            {
-                id: 1,
-                title: "Корпоративное право",
-                description: "Полное юридическое сопровождение бизнеса, регистрация компаний, договорная работа.",
-            },
-            {
-                id: 2,
-                title: "Налоговое право",
-                description: "Оптимизация налогообложения, защита в налоговых спорах, консультации.",
-            },
-            {
-                id: 3,
-                title: "Недвижимость",
-                description: "Сделки с недвижимостью, сопровождение сделок, разрешение споров.",
-            },
-            {
-                id: 4,
-                title: "Семейное право",
-                description: "Разводы, раздел имущества, алименты, брачные договоры.",
-            },
-            {
-                id: 5,
-                title: "Наследственное право",
-                description: "Оформление наследства, оспаривание завещаний, наследственные споры.",
-            },
-            {
-                id: 6,
-                title: "Защита прав потребителей",
-                description: "Взыскание убытков, защита от недобросовестных продавцов.",
-            },
-        ]
-    };
-
     // Получаем услуги на текущем языке
-    const services = servicesData[currentLanguage] || servicesData.en;
+    const currentServices = getServicesForDisplay(currentLanguage as 'en' | 'ru');
 
-    // Анимация появления
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => entry.isIntersecting && setVisible(true),
-            { threshold: 0.2 }
-        );
-        if (ref.current) observer.observe(ref.current);
-        return () => observer.disconnect();
-    }, []);
+    // появление секции
+    const [ref, visible] = useVisibility(0.2);
 
     // Отслеживаем тему
-    useEffect(() => {
-        const currentTheme =
-            document.documentElement.getAttribute("data-theme") || "dark";
-        setTheme(currentTheme as "dark" | "light");
-
-        const observer = new MutationObserver(() => {
-            const t =
-                document.documentElement.getAttribute("data-theme") || "dark";
-            setTheme(t as "dark" | "light");
-        });
-
-        observer.observe(document.documentElement, {
-            attributes: true,
-            attributeFilter: ["data-theme"],
-        });
-
-        return () => observer.disconnect();
-    }, []);
+    const { theme } = useTheme();
 
     // Смещение правой колонки
     const columnOffset = 60;
@@ -146,7 +47,7 @@ const ServicesSection: React.FC = () => {
 
                 {/* Сетка карточек */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 md:gap-x-8 lg:gap-x-12 gap-y-8 md:gap-y-12">
-                    {services.map((service) => (
+                    {currentServices.map((service) => (
                         <div
                             key={service.id}
                             className={`relative p-6 sm:p-8 bg-[var(--bg-secondary)] text-[var(--text-primary)] transition-all duration-400 ease-out 

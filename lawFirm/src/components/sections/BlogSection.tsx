@@ -2,173 +2,36 @@
 import { Link } from 'react-router-dom';
 import {useI18n} from "../../hooks/useI18n.ts";
 import DecorativeLine from "../common/DecorativeLine.tsx";
+import {formatDate, getPosts, translateCategory} from "../../services/blogService.ts";
+import {useVisibility} from "../../hooks/useVisibility.ts";
+import {useTheme} from "../../hooks/useTheme.ts";
 
-interface BlogPost {
-    id: number;
-    title: string;
-    excerpt: string;
-    date: string;
-    image: string;
-    category: string;
-    link: string;
-}
 
 const BlogSection: React.FC = () => {
-    const [visible, setVisible] = useState(false);
-    const [theme, setTheme] = useState<"dark" | "light">("dark");
     const [currentIndex, setCurrentIndex] = useState(0);
-    const ref = useRef<HTMLDivElement>(null);
     const postsContainerRef = useRef<HTMLDivElement>(null);
     const { t, currentLanguage } = useI18n();
 
-    // Константные данные на двух языках
-    const blogPosts: Record<string, BlogPost[]> = {
-        en: [
-            {
-                id: 1,
-                title: "Changes in Tax Legislation 2024",
-                excerpt: "Overview of key amendments to the tax code coming into effect next year.",
-                date: "December 15, 2023",
-                image: "/blog/post1.jpg",
-                category: "Tax Law",
-                link: "/blog/tax-2024",
-            },
-            {
-                id: 2,
-                title: "How to Protect Business from Raider Takeover",
-                excerpt: "Practical recommendations for protecting corporate rights and preventing hostile takeovers.",
-                date: "December 10, 2023",
-                image: "/blog/post2.jpg",
-                category: "Corporate Law",
-                link: "/blog/anti-raid",
-            },
-            {
-                id: 3,
-                title: "Digital Contracts: Legal Aspects",
-                excerpt: "Examining the legal nuances of electronic contracts and digital signatures.",
-                date: "December 5, 2023",
-                image: "/blog/post3.jpg",
-                category: "IT Law",
-                link: "/blog/digital-contracts",
-            },
-            {
-                id: 4,
-                title: "Liability for Customer Data Leaks",
-                excerpt: "How companies can minimize risks and act properly in case of confidentiality breaches.",
-                date: "December 2, 2023",
-                image: "/blog/post4.jpg",
-                category: "Data Protection",
-                link: "/blog/data-breach",
-            },
-            {
-                id: 5,
-                title: "Labor Relations: New Rules 2025",
-                excerpt: "What has changed in the Labor Code and how employers can adapt to new norms.",
-                date: "November 28, 2023",
-                image: "/blog/post5.jpg",
-                category: "Labor Law",
-                link: "/blog/labor-law-2025",
-            },
-            {
-                id: 6,
-                title: "Artificial Intelligence and Jurisprudence",
-                excerpt: "How AI affects judicial practice and legal processes worldwide.",
-                date: "November 20, 2023",
-                image: "/blog/post6.jpg",
-                category: "Technology",
-                link: "/blog/ai-law",
-            },
-        ],
-        ru: [
-            {
-                id: 1,
-                title: "Изменения в налоговом законодательстве 2024",
-                excerpt: "Обзор ключевых поправок в налоговом кодексе, вступающих в силу в следующем году.",
-                date: "15 декабря 2023",
-                image: "/blog/post1.jpg",
-                category: "Налоговое право",
-                link: "/blog/tax-2024",
-            },
-            {
-                id: 2,
-                title: "Как защитить бизнес от рейдерского захвата",
-                excerpt: "Практические рекомендации по защите корпоративных прав и предотвращению недружественных поглощений.",
-                date: "10 декабря 2023",
-                image: "/blog/post2.jpg",
-                category: "Корпоративное право",
-                link: "/blog/anti-raid",
-            },
-            {
-                id: 3,
-                title: "Цифровые договоры: правовые аспекты",
-                excerpt: "Разбираем юридические тонкости заключения электронных договоров и цифровых подписей.",
-                date: "5 декабря 2023",
-                image: "/blog/post3.jpg",
-                category: "IT-право",
-                link: "/blog/digital-contracts",
-            },
-            {
-                id: 4,
-                title: "Ответственность за утечку данных клиентов",
-                excerpt: "Как компании минимизировать риски и правильно действовать при нарушении конфиденциальности.",
-                date: "2 декабря 2023",
-                image: "/blog/post4.jpg",
-                category: "Защита данных",
-                link: "/blog/data-breach",
-            },
-            {
-                id: 5,
-                title: "Трудовые отношения: новые правила 2025",
-                excerpt: "Что изменилось в Трудовом кодексе и как работодателям адаптироваться к новым нормам.",
-                date: "28 ноября 2023",
-                image: "/blog/post5.jpg",
-                category: "Трудовое право",
-                link: "/blog/labor-law-2025",
-            },
-            {
-                id: 6,
-                title: "Искусственный интеллект и юриспруденция",
-                excerpt: "Как AI влияет на судебную практику и юридические процессы по всему миру.",
-                date: "20 ноября 2023",
-                image: "/blog/post6.jpg",
-                category: "Технологии",
-                link: "/blog/ai-law",
-            },
-        ]
-    };
-
     // Получаем посты на текущем языке
-    const currentPosts = blogPosts[currentLanguage] || blogPosts.en;
+    const allPosts = getPosts();
+    const languageKey = currentLanguage as 'en' | 'ru';
+
+    const currentPosts = allPosts.map(post => ({
+        id: post.id,
+        title: post.translations[languageKey]?.title || post.translations.en.title,
+        excerpt: post.translations[languageKey]?.excerpt || post.translations.en.excerpt,
+        content: post.translations[languageKey]?.content || post.translations.en.content,
+        date: formatDate(post.date, languageKey),
+        image: post.image,
+        category: translateCategory(post.category, languageKey),
+        slug: post.slug
+    }));
 
     // появление секции
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => entry.isIntersecting && setVisible(true),
-            { threshold: 0.2 }
-        );
-        if (ref.current) observer.observe(ref.current);
-        return () => observer.disconnect();
-    }, []);
+    const [ref, visible] = useVisibility(0.2);
 
     // отслеживание темы
-    useEffect(() => {
-        const currentTheme =
-            document.documentElement.getAttribute("data-theme") || "dark";
-        setTheme(currentTheme as "dark" | "light");
-
-        const observer = new MutationObserver(() => {
-            const t =
-                document.documentElement.getAttribute("data-theme") || "dark";
-            setTheme(t as "dark" | "light");
-        });
-
-        observer.observe(document.documentElement, {
-            attributes: true,
-            attributeFilter: ["data-theme"],
-        });
-
-        return () => observer.disconnect();
-    }, []);
+    const { theme } = useTheme();
 
     const nextPost = () => {
         setCurrentIndex((prev) => (prev + 1) % currentPosts.length);
@@ -318,8 +181,8 @@ const BlogSection: React.FC = () => {
                                         </div>
 
                                         {/* Кнопка "read more" */}
-                                        <a
-                                            href={post.link}
+                                        <Link
+                                            to={`/blog/${post.slug}`}
                                             className="relative inline-flex items-center group/btn py-2"
                                         >
                                             <div className="relative overflow-hidden">
@@ -341,7 +204,7 @@ const BlogSection: React.FC = () => {
                                                             : "invert(0)",
                                                 }}
                                             />
-                                        </a>
+                                        </Link>
                                     </div>
                                 </div>
                             </article>

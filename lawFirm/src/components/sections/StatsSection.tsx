@@ -1,47 +1,18 @@
-﻿import React, { useEffect, useRef, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { useI18n } from "../../hooks/useI18n.ts";
 import DecorativeLine from "../common/DecorativeLine.tsx";
+import {getStatsForDisplay} from "../../services/statsService.ts";
+import {useVisibility} from "../../hooks/useVisibility.ts";
 
-interface StatItem {
-    number: number;
-    label: string;
-    hasPlus?: boolean;
-}
 
 const StatsSection: React.FC = () => {
-    const [visible, setVisible] = useState(false);
     const [animatedValues, setAnimatedValues] = useState<number[]>([]);
-    const ref = useRef<HTMLDivElement>(null);
     const { t, currentLanguage } = useI18n();
 
-    const statsData: Record<string, StatItem[]> = {
-        en: [
-            { number: 200, label: "Clients", hasPlus: true },
-            { number: 8, label: "Years of experience" },
-            { number: 22, label: "Lawyers" },
-            { number: 15, label: "Countries of presence" },
-            { number: 72, label: "Projects per year", hasPlus: true },
-        ],
-        ru: [
-            { number: 200, label: "Клиентов", hasPlus: true },
-            { number: 8, label: "Лет опыта" },
-            { number: 22, label: "Юристов" },
-            { number: 15, label: "Стран присутствия" },
-            { number: 72, label: "Проектов в год", hasPlus: true },
-        ]
-    };
-
     // Получаем статистику на текущем языке
-    const stats = statsData[currentLanguage] || statsData.en;
+    const stats = getStatsForDisplay(currentLanguage as 'en' | 'ru');
 
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => entry.isIntersecting && setVisible(true),
-            { threshold: 0.2 }
-        );
-        if (ref.current) observer.observe(ref.current);
-        return () => observer.disconnect();
-    }, []);
+    const [ref, visible] = useVisibility(0.2);
 
     useEffect(() => {
         if (!visible) return;

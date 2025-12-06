@@ -1,10 +1,9 @@
-﻿import React, { useEffect, useRef, useState } from "react";
+﻿import React from "react";
 import {useI18n} from "../../hooks/useI18n.ts";
 import DecorativeLine from "../common/DecorativeLine.tsx";
+import {useVisibility} from "../../hooks/useVisibility.ts";
 
 const AboutSection: React.FC = () => {
-    const [visible, setVisible] = useState(false);
-    const ref = useRef<HTMLDivElement>(null);
     const { t, currentLanguage } = useI18n();
 
     // Константные данные на двух языках
@@ -22,14 +21,7 @@ const AboutSection: React.FC = () => {
     // Получаем параграфы на текущем языке
     const paragraphs = aboutData[currentLanguage] || aboutData.en;
 
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => entry.isIntersecting && setVisible(true),
-            { threshold: 0.2 }
-        );
-        if (ref.current) observer.observe(ref.current);
-        return () => observer.disconnect();
-    }, []);
+    const [ref, visible] = useVisibility(0.2);
 
     return (
         <section

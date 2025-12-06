@@ -1,189 +1,17 @@
-﻿import React, { useEffect, useRef, useState } from "react";
+﻿import React, { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import {useI18n} from "../../../hooks/useI18n.ts";
 import DecorativeLine from "../../common/DecorativeLine.tsx";
-
-interface Service {
-    id: number;
-    title: string;
-    description: string;
-    image: string;
-    details: string[];
-}
+import {getServicesForDisplay} from "../../../services/serviceService.ts";
+import {useTheme} from "../../../hooks/useTheme.ts";
+import {useVisibility} from "../../../hooks/useVisibility.ts";
 
 const ServicesPageSection: React.FC = () => {
-    const [visible, setVisible] = useState(false);
-    const [theme, setTheme] = useState<"dark" | "light">("dark");
-    const ref = useRef<HTMLDivElement>(null);
     const location = useLocation();
     const { t, currentLanguage } = useI18n();
 
-    // Константные данные на двух языках
-    const services: Record<string, Service[]> = {
-        en: [
-            {
-                id: 1,
-                title: "Corporate Law",
-                description: "Complete legal support for business, company registration, contract work.",
-                image: "/services/service4.jpg",
-                details: [
-                    "Company registration and liquidation",
-                    "Contract work and deal support",
-                    "Corporate governance and compliance",
-                    "Mergers and acquisitions (M&A)",
-                    "Protection from raider attacks"
-                ]
-            },
-            {
-                id: 2,
-                title: "Tax Law",
-                description: "Tax optimization, protection in tax disputes, consultations.",
-                image: "/services/service3.jpg",
-                details: [
-                    "Tax planning and optimization",
-                    "Protection in tax disputes",
-                    "Tax due diligence",
-                    "Consultations on tax legislation",
-                    "Support during tax audits"
-                ]
-            },
-            {
-                id: 3,
-                title: "Real Estate",
-                description: "Real estate transactions, deal support, dispute resolution.",
-                image: "/services/service6.jpg",
-                details: [
-                    "Support for real estate transactions",
-                    "Legal examination of documents",
-                    "Resolution of land disputes",
-                    "Property rights registration",
-                    "Shared construction"
-                ]
-            },
-            {
-                id: 4,
-                title: "Family Law",
-                description: "Divorces, property division, alimony, marriage contracts.",
-                image: "/services/service5.jpg",
-                details: [
-                    "Divorce and property division",
-                    "Alimony collection",
-                    "Marriage contracts and agreements",
-                    "Child custody disputes",
-                    "Paternity establishment"
-                ]
-            },
-            {
-                id: 5,
-                title: "Inheritance Law",
-                description: "Inheritance registration, will contestation, inheritance disputes.",
-                image: "/services/service7.jpg",
-                details: [
-                    "Inheritance registration with notary",
-                    "Will contestation",
-                    "Inheritance dispute resolution",
-                    "Recognition of compulsory share rights",
-                    "Restoration of inheritance acceptance terms"
-                ]
-            },
-            {
-                id: 6,
-                title: "Consumer Rights Protection",
-                description: "Loss recovery, protection from unfair sellers.",
-                image: "/services/service2.jpg",
-                details: [
-                    "Rights protection when purchasing goods and services",
-                    "Loss and compensation recovery",
-                    "Disputes with tour operators",
-                    "Protection when acquiring real estate",
-                    "Legal support in courts"
-                ]
-            },
-        ],
-        ru: [
-            {
-                id: 1,
-                title: "Корпоративное право",
-                description: "Полное юридическое сопровождение бизнеса, регистрация компаний, договорная работа.",
-                image: "/services/service4.jpg",
-                details: [
-                    "Регистрация и ликвидация компаний",
-                    "Договорная работа и сопровождение сделок",
-                    "Корпоративное управление и compliance",
-                    "Слияния и поглощения (M&A)",
-                    "Защита от рейдерских захватов"
-                ]
-            },
-            {
-                id: 2,
-                title: "Налоговое право",
-                description: "Оптимизация налогообложения, защита в налоговых спорах, консультации.",
-                image: "/services/service3.jpg",
-                details: [
-                    "Налоговое планирование и оптимизация",
-                    "Защита в налоговых спорах",
-                    "Налоговый due diligence",
-                    "Консультации по налоговому законодательству",
-                    "Сопровождение налоговых проверок"
-                ]
-            },
-            {
-                id: 3,
-                title: "Недвижимость",
-                description: "Сделки с недвижимостью, сопровождение сделок, разрешение споров.",
-                image: "/services/service6.jpg",
-                details: [
-                    "Сопровождение сделок с недвижимостью",
-                    "Юридическая экспертиза документов",
-                    "Разрешение земельных споров",
-                    "Оформление прав собственности",
-                    "Долевое строительство"
-                ]
-            },
-            {
-                id: 4,
-                title: "Семейное право",
-                description: "Разводы, раздел имущества, алименты, брачные договоры.",
-                image: "/services/service5.jpg",
-                details: [
-                    "Расторжение брака и раздел имущества",
-                    "Взыскание алиментов",
-                    "Брачные договоры и соглашения",
-                    "Споры о детях и опеке",
-                    "Установление отцовства"
-                ]
-            },
-            {
-                id: 5,
-                title: "Наследственное право",
-                description: "Оформление наследства, оспаривание завещаний, наследственные споры.",
-                image: "/services/service7.jpg",
-                details: [
-                    "Оформление наследства у нотариуса",
-                    "Оспаривание завещаний",
-                    "Разрешение наследственных споров",
-                    "Признание права на обязательную долю",
-                    "Восстановление сроков принятия наследства"
-                ]
-            },
-            {
-                id: 6,
-                title: "Защита прав потребителей",
-                description: "Взыскание убытков, защита от недобросовестных продавцов.",
-                image: "/services/service2.jpg",
-                details: [
-                    "Защита прав при покупке товаров и услуг",
-                    "Взыскание убытков и компенсаций",
-                    "Споры с туроператорами",
-                    "Защита при приобретении недвижимости",
-                    "Юридическое сопровождение в судах"
-                ]
-            },
-        ]
-    };
-
     // Получаем услуги на текущем языке
-    const currentServices = services[currentLanguage] || services.en;
+    const currentServices = getServicesForDisplay(currentLanguage as 'en' | 'ru');
 
     useEffect(() => {
         const urlParams = new URLSearchParams(location.search);
@@ -199,32 +27,10 @@ const ServicesPageSection: React.FC = () => {
     }, [location]);
 
     // появление секции
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => entry.isIntersecting && setVisible(true),
-            { threshold: 0.1 }
-        );
-        if (ref.current) observer.observe(ref.current);
-        return () => observer.disconnect();
-    }, []);
+    const [ref, visible] = useVisibility(0.1);
 
     // отслеживание темы
-    useEffect(() => {
-        const currentTheme = document.documentElement.getAttribute("data-theme") || "dark";
-        setTheme(currentTheme as "dark" | "light");
-
-        const observer = new MutationObserver(() => {
-            const t = document.documentElement.getAttribute("data-theme") || "dark";
-            setTheme(t as "dark" | "light");
-        });
-
-        observer.observe(document.documentElement, {
-            attributes: true,
-            attributeFilter: ["data-theme"],
-        });
-
-        return () => observer.disconnect();
-    }, []);
+    const { theme } = useTheme();
 
     const handleContactClick = (serviceTitle: string) => {
         sessionStorage.setItem('selectedService', serviceTitle);

@@ -1,80 +1,105 @@
-﻿import React, { useState, useEffect, useRef } from "react";
-import {useI18n} from "../../hooks/useI18n.ts";
+﻿import React, { useEffect } from "react";
+import { useI18n } from "../../hooks/useI18n.ts";
 import DecorativeLine from "../common/DecorativeLine.tsx";
+import { getCategoriesByLanguage } from "../../services/blogService.ts";
+import { createApplication } from "../../services/applicationService.ts";
+import { Link } from "react-router-dom";
+import { useTheme } from "../../hooks/useTheme.ts";
+import { useVisibility } from "../../hooks/useVisibility.ts";
+import {useForm} from "../../hooks/useForm.tsx";
 
-interface FormErrors {
-    name?: string;
-    email?: string;
-    phone?: string;
-    service?: string;
-    message?: string;
-}
-
-interface ValidationRules {
-    required?: boolean;
-    minLength?: number;
-    email?: boolean;
-    phone?: boolean;
+interface FormData {
+    name: string;
+    email: string;
+    phone: string;
+    service: string;
+    message: string;
 }
 
 const ContactSection: React.FC = () => {
-    const [visible, setVisible] = useState(false);
-    const [theme, setTheme] = useState<"dark" | "light">("dark");
-    const ref = useRef<HTMLDivElement>(null);
     const { t, currentLanguage } = useI18n();
+    const { theme } = useTheme();
+    const [ref, visible] = useVisibility(0.2);
+    const blogCategories = getCategoriesByLanguage(currentLanguage as 'en' | 'ru');
 
-    const [formData, setFormData] = useState({
-        name: "",
-        email: "",
-        phone: "",
-        service: "",
-        message: "",
-    });
+    const services = [...blogCategories];
 
-    const [errors, setErrors] = useState<FormErrors>({});
-    const [touched, setTouched] = useState<Record<string, boolean>>({});
+    // Функция валидации
+    const validateForm = (values: FormData): Partial<Record<keyof FormData, string>> => {
+        const errors: Partial<Record<keyof FormData, string>> = {};
 
-    // Константные данные на двух языках
-    const servicesData: Record<string, string[]> = {
-        en: [
-            "Corporate Law",
-            "Tax Law",
-            "Real Estate",
-            "Family Law",
-            "Inheritance Law",
-            "Consumer Rights Protection",
-            "Other",
-        ],
-        ru: [
-            "Корпоративное право",
-            "Налоговое право",
-            "Недвижимость",
-            "Семейное право",
-            "Наследственное право",
-            "Защита прав потребителей",
-            "Другое",
-        ]
+        if (!values.name.trim()) {
+            errors.name = t('contact.errors.required');
+        } else if (values.name.trim().length < 2) {
+            errors.name = t('contact.errors.minLength', { length: 2 });
+        }
+
+        if (!values.phone.trim()) {
+            errors.phone = t('contact.errors.required');
+        } else {
+            const phoneDigits = values.phone.replace(/\D/g, '');
+            if (phoneDigits.length !== 10) {
+                errors.phone = t('contact.errors.phone');
+            }
+        }
+
+        if (values.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
+            errors.email = t('contact.errors.email');
+        }
+
+        if (!values.service) {
+            errors.service = t('contact.errors.required');
+        }
+
+        return errors;
     };
 
-    // Получаем услуги на текущем языке
-    const services = servicesData[currentLanguage] || servicesData.en;
+    // Обработчик отправки формы
+    const handleSubmit = async (values: FormData) => {
+        createApplication({
+            name: values.name,
+            email: values.email,
+            phone: values.phone,
+            service: values.service,
+            message: values.message
+        }, currentLanguage as 'en' | 'ru');
+
+        console.log("Форма отправлена:", values);
+        alert(t('contact.successMessage'));
+    };
+
+    // Используем хук формы
+    const {
+        values: formData,
+        errors,
+        touched,
+        isSubmitting,
+        handleChange,
+        handleBlur,
+        handleSubmit: submitHandler,
+        resetForm,
+        setFieldValue
+    } = useForm<FormData>({
+        initialValues: {
+            name: "",
+            email: "",
+            phone: "",
+            service: "",
+            message: "",
+        },
+        validate: validateForm,
+        onSubmit: handleSubmit
+    });
 
     // Автоматическое заполнение услуги
     useEffect(() => {
         const handleServiceSelection = (event: CustomEvent) => {
-            setFormData(prev => ({
-                ...prev,
-                service: event.detail.service
-            }));
+            setFieldValue('service', event.detail.service);
         };
 
-        // Проверяем есть ли сохраненная услуга при монтировании
         const savedService = sessionStorage.getItem('selectedService');
         if (savedService) {
-            setFormData(prev => ({
-                ...prev,
-                service: savedService
-            }));
+            setFieldValue('service', savedService);
             sessionStorage.removeItem('selectedService');
         }
 
@@ -83,154 +108,17 @@ const ContactSection: React.FC = () => {
         return () => {
             window.removeEventListener('serviceSelected', handleServiceSelection as EventListener);
         };
-    }, []);
+    }, [setFieldValue]);
 
-    // Функции валидации
-    const validateField = (name: string, value: string): string => {
-        const rules: Record<string, ValidationRules> = {
-            name: { required: true, minLength: 2 },
-            phone: { required: true, phone: true },
-            email: { email: true },
-            service: { required: true },
-            message: { },
-        };
-
-        const fieldRules = rules[name];
-        if (!fieldRules) return "";
-
-        if (fieldRules.required && !value.trim()) {
-            return t('contact.errors.required');
-        }
-
-        if (fieldRules.minLength && value.trim().length < fieldRules.minLength) {
-            return t('contact.errors.minLength', { length: fieldRules.minLength });
-        }
-
-        if (fieldRules.email && value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-            return t('contact.errors.email');
-        }
-
-        if (fieldRules.phone && value) {
-            const phoneDigits = value.replace(/\D/g, '');
-            if (phoneDigits.length !== 10) {
-                return t('contact.errors.phone');
-            }
-        }
-
-        return "";
-    };
-
-    const validateForm = (): boolean => {
-        const newErrors: FormErrors = {};
-
-        Object.keys(formData).forEach((key) => {
-            const error = validateField(key, formData[key as keyof typeof formData]);
-            if (error) {
-                newErrors[key as keyof FormErrors] = error;
-            }
-        });
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-    const handleChange = (
-        e: React.ChangeEvent<
-            HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-        >
-    ) => {
-        const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value,
-        });
-
-        // Валидация при изменении, если поле уже было тронуто
-        if (touched[name]) {
-            const error = validateField(name, value);
-            setErrors(prev => ({
-                ...prev,
-                [name]: error
-            }));
+    // Обработчик формы со сбросом после успешной отправки
+    const handleFormSubmit = async (e: React.FormEvent) => {
+        await submitHandler(e);
+        if (Object.keys(errors).length === 0) {
+            resetForm();
         }
     };
 
-    const handleBlur = (
-        e: React.FocusEvent<
-            HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-        >
-    ) => {
-        const { name, value } = e.target;
-        setTouched(prev => ({ ...prev, [name]: true }));
-
-        const error = validateField(name, value);
-        setErrors(prev => ({
-            ...prev,
-            [name]: error
-        }));
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-
-        // Помечаем все поля как тронутые при отправке
-        const allTouched = Object.keys(formData).reduce((acc, key) => {
-            acc[key] = true;
-            return acc;
-        }, {} as Record<string, boolean>);
-
-        setTouched(allTouched);
-
-        if (validateForm()) {
-            console.log("Форма отправлена:", formData);
-            // отправка на сервер?
-            alert(t('contact.successMessage'));
-
-            // Сброс формы
-            setFormData({
-                name: "",
-                email: "",
-                phone: "",
-                service: "",
-                message: "",
-            });
-            setErrors({});
-            setTouched({});
-        } else {
-            console.log("Ошибки валидации:", errors);
-        }
-    };
-
-    // Анимация появления секции
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => entry.isIntersecting && setVisible(true),
-            { threshold: 0.2 }
-        );
-        if (ref.current) observer.observe(ref.current);
-        return () => observer.disconnect();
-    }, []);
-
-    // Отслеживание темы
-    useEffect(() => {
-        const currentTheme =
-            document.documentElement.getAttribute("data-theme") || "dark";
-        setTheme(currentTheme as "dark" | "light");
-
-        const observer = new MutationObserver(() => {
-            const t =
-                document.documentElement.getAttribute("data-theme") || "dark";
-            setTheme(t as "dark" | "light");
-        });
-
-        observer.observe(document.documentElement, {
-            attributes: true,
-            attributeFilter: ["data-theme"],
-        });
-
-        return () => observer.disconnect();
-    }, []);
-
+    // JSX остается практически без изменений, только замените обработчики:
     return (
         <section
             id="contact"
@@ -342,7 +230,7 @@ const ContactSection: React.FC = () => {
                                 : "border-black/10 bg-white/60 backdrop-blur-md"
                         }`}
                     >
-                        <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+                        <form onSubmit={handleFormSubmit} className="space-y-6" noValidate>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                                 <div>
                                     <label className="block text-sm mb-2 font-medium">
@@ -359,8 +247,9 @@ const ContactSection: React.FC = () => {
                                             errors.name ? 'border-red-500' : 'border-[var(--text-secondary)]'
                                         }`}
                                         placeholder={t('contact.placeholders.name')}
+                                        disabled={isSubmitting}
                                     />
-                                    {errors.name && (
+                                    {errors.name && touched.name && (
                                         <p className="text-red-500 text-xs mt-1">{errors.name}</p>
                                     )}
                                 </div>
@@ -379,8 +268,9 @@ const ContactSection: React.FC = () => {
                                             errors.phone ? 'border-red-500' : 'border-[var(--text-secondary)]'
                                         }`}
                                         placeholder={t('contact.placeholders.phone')}
+                                        disabled={isSubmitting}
                                     />
-                                    {errors.phone && (
+                                    {errors.phone && touched.phone && (
                                         <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
                                     )}
                                 </div>
@@ -400,8 +290,9 @@ const ContactSection: React.FC = () => {
                                         errors.email ? 'border-red-500' : 'border-[var(--text-secondary)]'
                                     }`}
                                     placeholder={t('contact.placeholders.email')}
+                                    disabled={isSubmitting}
                                 />
-                                {errors.email && (
+                                {errors.email && touched.email && (
                                     <p className="text-red-500 text-xs mt-1">{errors.email}</p>
                                 )}
                             </div>
@@ -423,6 +314,7 @@ const ContactSection: React.FC = () => {
                                             backgroundColor: theme === "dark" ? "var(--bg-secondary)" : "transparent",
                                             color: "var(--text-primary)"
                                         }}
+                                        disabled={isSubmitting}
                                     >
                                         <option value="">{t('contact.placeholders.service')}</option>
                                         {services.map((s, i) => (
@@ -443,7 +335,7 @@ const ContactSection: React.FC = () => {
                                         }}
                                     />
                                 </div>
-                                {errors.service && (
+                                {errors.service && touched.service && (
                                     <p className="text-red-500 text-xs mt-1">{errors.service}</p>
                                 )}
                             </div>
@@ -462,8 +354,9 @@ const ContactSection: React.FC = () => {
                                         errors.message ? 'border-red-500' : 'border-[var(--text-secondary)]'
                                     }`}
                                     placeholder={t('contact.placeholders.message')}
+                                    disabled={isSubmitting}
                                 />
-                                {errors.message && (
+                                {errors.message && touched.message && (
                                     <p className="text-red-500 text-xs mt-1">{errors.message}</p>
                                 )}
                             </div>
@@ -471,26 +364,27 @@ const ContactSection: React.FC = () => {
                             {/* Кнопка с анимацией как на других секциях */}
                             <button
                                 type="submit"
-                                className="relative inline-flex items-center group py-4 active:scale-95 transition-transform duration-150"
+                                className="relative inline-flex items-center group py-4 active:scale-95 transition-transform duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={isSubmitting}
                             >
                                 <div className="relative overflow-hidden">
                                     <div className="text-[var(--accent)] uppercase tracking-wide font-medium transition-transform duration-300 group-hover:-translate-y-full">
-                                        {t('contact.submit')}
+                                        {isSubmitting ? t('contact.submitting') : t('contact.submit')}
                                     </div>
                                     <div className="absolute left-0 top-full text-[var(--accent)] uppercase tracking-wide font-medium transition-transform duration-300 group-hover:translate-y-[-100%]">
-                                        {t('contact.submit')}
+                                        {isSubmitting ? t('contact.submitting') : t('contact.submit')}
                                     </div>
                                 </div>
                             </button>
 
                             <p className="text-sm text-[var(--text-secondary)] text-center mt-4">
                                 {t('contact.privacy.part1')}{" "}
-                                <a
-                                    href="/privacy"
+                                <Link
+                                    to="/privacy"
                                     className="text-[var(--accent)] underline"
                                 >
                                     {t('contact.privacy.part2')}
-                                </a>
+                                </Link>
                             </p>
                         </form>
                     </div>

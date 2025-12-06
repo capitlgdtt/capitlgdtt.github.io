@@ -1,153 +1,18 @@
-﻿import React, { useEffect, useRef, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { useI18n } from "../../hooks/useI18n.ts";
 import DecorativeLine from "../common/DecorativeLine.tsx";
-
-interface Review {
-    id: number;
-    author: string;
-    position: string;
-    text: string;
-    rating: number;
-}
+import {reviewsData} from "../../data/reviews.ts";
+import {useVisibility} from "../../hooks/useVisibility.ts";
 
 const ReviewsSection: React.FC = () => {
-    const [visible, setVisible] = useState(false);
     const [scrollProgress, setScrollProgress] = useState(0);
-    const ref = useRef<HTMLDivElement>(null);
     const { t, currentLanguage } = useI18n();
-
-    // Константные данные на двух языках
-    const reviewsData: Record<string, Review[]> = {
-        en: [
-            {
-                id: 1,
-                author: "Ivan Sidorov",
-                position: 'Director of "TechnoProfi" LLC',
-                text: "Thank you to the CompanyName team for professional support of our company. They resolved a complex corporate dispute in our favor.",
-                rating: 5,
-            },
-            {
-                id: 2,
-                author: "Maria Kovaleva",
-                position: "Private Entrepreneur",
-                text: "Helped with business registration and tax optimization. Everything was done quickly and efficiently. I recommend!",
-                rating: 5,
-            },
-            {
-                id: 3,
-                author: "Alexey Volkov",
-                position: 'IT company "Develop"',
-                text: "CompanyName lawyers handle our international contracts. Always at the highest level - prompt and professional.",
-                rating: 5,
-            },
-            {
-                id: 4,
-                author: "Sergey Petrov",
-                position: 'General Director of "StroyGarant"',
-                text: "Quality legal support for construction business. Helped with permitting documentation.",
-                rating: 4,
-            },
-            {
-                id: 5,
-                author: "Olga Smirnova",
-                position: 'Financial Director of "BusinessConsult"',
-                text: "Professional tax consulting and optimization of company financial flows.",
-                rating: 5,
-            },
-            {
-                id: 6,
-                author: "Dmitry Orlov",
-                position: 'Restaurant business owner',
-                text: "Helped with licensing of alcoholic products and contractual relations with suppliers.",
-                rating: 4,
-            },
-            {
-                id: 7,
-                author: "Ekaterina Novikova",
-                position: 'HR Director of "PersonnelGroup"',
-                text: "Legal support of labor relations and personnel document flow at the highest level.",
-                rating: 5,
-            },
-            {
-                id: 8,
-                author: "Pavel Kozlov",
-                position: 'Startup "TechnoInnovations"',
-                text: "Helped with patent registration and intellectual property registration. Thank you!",
-                rating: 5,
-            },
-        ],
-        ru: [
-            {
-                id: 1,
-                author: "Иван Сидоров",
-                position: 'Директор ООО "ТехноПрофи"',
-                text: "Благодарю команду CompanyName за профессиональное сопровождение нашей компании. Решили сложный корпоративный спор в нашу пользу.",
-                rating: 5,
-            },
-            {
-                id: 2,
-                author: "Мария Ковалева",
-                position: "Частный предприниматель",
-                text: "Помогли с регистрацией бизнеса и налоговой оптимизацией. Все сделали быстро и качественно. Рекомендую!",
-                rating: 5,
-            },
-            {
-                id: 3,
-                author: "Алексей Волков",
-                position: 'IT-компания "Девелоп"',
-                text: "Юристы CompanyName сопровождают наши международные контракты. Всегда на высоте — оперативно и профессионально.",
-                rating: 5,
-            },
-            {
-                id: 4,
-                author: "Сергей Петров",
-                position: 'Генеральный директор "СтройГарант"',
-                text: "Качественная юридическая поддержка строительного бизнеса. Помогли с разрешительной документацией.",
-                rating: 4,
-            },
-            {
-                id: 5,
-                author: "Ольга Смирнова",
-                position: 'Финансовый директор "БизнесКонсалт"',
-                text: "Профессиональное налоговое консультирование и оптимизация финансовых потоков компании.",
-                rating: 5,
-            },
-            {
-                id: 6,
-                author: "Дмитрий Орлов",
-                position: 'Владелец ресторанного бизнеса',
-                text: "Помогли с лицензированием алкогольной продукции и договорными отношениями с поставщиками.",
-                rating: 4,
-            },
-            {
-                id: 7,
-                author: "Екатерина Новикова",
-                position: 'HR-директор "ПерсоналГрупп"',
-                text: "Юридическое сопровождение трудовых отношений и кадрового документооборота на высшем уровне.",
-                rating: 5,
-            },
-            {
-                id: 8,
-                author: "Павел Козлов",
-                position: 'Стартап "ТехноИнновации"',
-                text: "Помогли с регистрацией патентов и оформлением интеллектуальной собственности. Спасибо!",
-                rating: 5,
-            },
-        ]
-    };
 
     // Получаем отзывы на текущем языке
     const reviews = reviewsData[currentLanguage] || reviewsData.en;
 
     // появление секции
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => entry.isIntersecting && setVisible(true),
-            { threshold: 0.2 }
-        );
-        if (ref.current) observer.observe(ref.current);
-        return () => observer.disconnect();
-    }, []);
+    const [ref, visible] = useVisibility(0.2);
 
     // танцы с бубном
     useEffect(() => {

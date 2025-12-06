@@ -1,47 +1,32 @@
-﻿import React, { useEffect, useRef, useState } from "react";
+﻿import React from "react";
 import {useI18n} from "../../../hooks/useI18n.ts";
 import DecorativeLine from "../../common/DecorativeLine.tsx";
 import { Link } from "react-router-dom";
-import {blogPosts} from "../../../data/blogPosts.ts";
+import {getPosts} from "../../../services/blogService.ts";
+import {useTheme} from "../../../hooks/useTheme.ts";
+import {useVisibility} from "../../../hooks/useVisibility.ts";
 
 const BlogPageSection: React.FC = () => {
-    const [visible, setVisible] = useState(false);
-    const [theme, setTheme] = useState<"dark" | "light">("dark");
-    const ref = useRef<HTMLDivElement>(null);
+    const { theme } = useTheme();
     const { t, currentLanguage } = useI18n();
 
     // Получаем посты на текущем языке
-    const currentPosts = blogPosts[currentLanguage] || blogPosts.en;
+    const allPosts = getPosts();
+    const languageKey = currentLanguage as 'en' | 'ru';
+
+    const currentPosts = allPosts.map(post => ({
+        id: post.id,
+        title: post.translations[languageKey]?.title || post.translations.en.title,
+        excerpt: post.translations[languageKey]?.excerpt || post.translations.en.excerpt,
+        content: post.translations[languageKey]?.content || post.translations.en.content,
+        date: post.date,
+        image: post.image,
+        category: post.category,
+        slug: post.slug
+    }));
 
     // появление секции
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => entry.isIntersecting && setVisible(true),
-            { threshold: 0.2 }
-        );
-        if (ref.current) observer.observe(ref.current);
-        return () => observer.disconnect();
-    }, []);
-
-    // отслеживание темы
-    useEffect(() => {
-        const currentTheme =
-            document.documentElement.getAttribute("data-theme") || "dark";
-        setTheme(currentTheme as "dark" | "light");
-
-        const observer = new MutationObserver(() => {
-            const t =
-                document.documentElement.getAttribute("data-theme") || "dark";
-            setTheme(t as "dark" | "light");
-        });
-
-        observer.observe(document.documentElement, {
-            attributes: true,
-            attributeFilter: ["data-theme"],
-        });
-
-        return () => observer.disconnect();
-    }, []);
+    const [ref, visible] = useVisibility(0.2);
 
     return (
         <section

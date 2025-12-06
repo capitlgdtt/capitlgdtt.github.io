@@ -1,0 +1,306 @@
+﻿import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useI18n } from '../../../../hooks/useI18n';
+import LanguageTabs from "../../editor/LanguageTabs.tsx";
+import {
+    getServiceById,
+    createService,
+    updateService
+} from '../../../../services/serviceService.ts';
+
+const ServiceEditor: React.FC = () => {
+    const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
+    const { t, currentLanguage: siteLanguage } = useI18n();
+
+    const isEditing = !!id;
+    const serviceId = id ? parseInt(id) : undefined;
+
+    const [formData, setFormData] = useState({
+        translations: {
+            en: { title: '', description: '', details: [''] },
+            ru: { title: '', description: '', details: [''] }
+        },
+        image: '',
+        currentLanguage: siteLanguage as 'en' | 'ru'
+    });
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
+    // Загрузка данных при редактировании
+    useEffect(() => {
+        if (isEditing && serviceId) {
+            const service = getServiceById(serviceId);
+            if (service) {
+                setFormData({
+                    translations: service.translations,
+                    image: service.image,
+                    currentLanguage: siteLanguage as 'en' | 'ru'
+                });
+            }
+        }
+    }, [isEditing, serviceId, siteLanguage]);
+
+    const handleTranslationChange = (
+        field: 'title' | 'description',
+        value: string
+    ) => {
+        setFormData(prev => ({
+            ...prev,
+            translations: {
+                ...prev.translations,
+                [prev.currentLanguage]: {
+                    ...prev.translations[prev.currentLanguage],
+                    [field]: value
+                }
+            }
+        }));
+    };
+
+    const handleDetailChange = (index: number, value: string) => {
+        setFormData(prev => {
+            const newDetails = [...prev.translations[prev.currentLanguage].details];
+            newDetails[index] = value;
+
+            return {
+                ...prev,
+                translations: {
+                    ...prev.translations,
+                    [prev.currentLanguage]: {
+                        ...prev.translations[prev.currentLanguage],
+                        details: newDetails
+                    }
+                }
+            };
+        });
+    };
+
+    const addDetail = () => {
+        setFormData(prev => ({
+            ...prev,
+            translations: {
+                ...prev.translations,
+                [prev.currentLanguage]: {
+                    ...prev.translations[prev.currentLanguage],
+                    details: [...prev.translations[prev.currentLanguage].details, '']
+                }
+            }
+        }));
+    };
+
+    const removeDetail = (index: number) => {
+        const currentDetails = formData.translations[formData.currentLanguage].details;
+        if (currentDetails.length > 1) {
+            setFormData(prev => {
+                const newDetails = currentDetails.filter((_, i) => i !== index);
+
+                return {
+                    ...prev,
+                    translations: {
+                        ...prev.translations,
+                        [prev.currentLanguage]: {
+                            ...prev.translations[prev.currentLanguage],
+                            details: newDetails
+                        }
+                    }
+                };
+            });
+        }
+    };
+
+    const handleLanguageChange = (language: 'en' | 'ru') => {
+        setFormData(prev => ({ ...prev, currentLanguage: language }));
+    };
+
+    const handleSave = () => {
+        const serviceData = {
+            translations: formData.translations,
+            image: formData.image || '/services/default.jpg'
+        };
+
+        if (isEditing && serviceId) {
+            updateService(serviceId, serviceData);
+        } else {
+            createService(serviceData);
+        }
+
+        navigate('/admin/services');
+    };
+
+    const handleCancel = () => {
+        navigate('/admin/services');
+    };
+
+    const currentTranslation = formData.translations[formData.currentLanguage];
+
+    return (
+        <section
+            className="relative bg-[var(--bg-primary)] text-[var(--text-primary)] overflow-hidden"
+            style={{
+                padding: "var(--container-padding)",
+                paddingTop: "calc(var(--header-height) + 2rem)"
+            }}
+        >
+            <div className="max-w-[1920px] mx-auto w-full">
+                {/* Заголовок */}
+                <div className="overflow-hidden mb-6">
+                    <h2 className="text-[2rem] sm:text-[2.5rem] md:text-[3rem] lg:text-[4rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
+                        {isEditing ? t('admin.services.editService') : t('admin.services.createService')}
+                    </h2>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-x-8 gap-y-4 mb-6">
+                    {/* Кнопка возврата */}
+                    <button
+                        onClick={handleCancel}
+                        className="relative inline-flex items-center group py-4"
+                    >
+                        <img
+                            src="/arrow_details.svg"
+                            alt="arrow"
+                            className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:-translate-x-1"
+                            style={{
+                                filter: "invert(54%) sepia(95%) saturate(1555%) hue-rotate(190deg) brightness(95%) contrast(90%)",
+                                transform: 'scaleX(-1)'
+                            }}
+                        />
+                        <div className="relative overflow-hidden">
+                            <div className="text-[var(--accent)] uppercase tracking-wide font-medium transition-transform duration-300 group-hover:-translate-y-full">
+                                {t('admin.backToServices')}
+                            </div>
+                            <div className="absolute left-0 top-full text-[var(--accent)] uppercase tracking-wide font-medium transition-transform duration-300 group-hover:translate-y-[-100%]">
+                                {t('admin.backToServices')}
+                            </div>
+                        </div>
+                    </button>
+                </div>
+
+                {/* Языковые табы */}
+                <LanguageTabs
+                    currentLanguage={formData.currentLanguage}
+                    onLanguageChange={handleLanguageChange}
+                />
+
+                {/* Форма */}
+                <div className="space-y-6 mb-8">
+                    {/* Название услуги */}
+                    <div>
+                        <label className="block text-sm font-medium mb-2">
+                            {t('admin.services.form.title')} *
+                        </label>
+                        <input
+                            type="text"
+                            value={currentTranslation.title}
+                            onChange={(e) => handleTranslationChange('title', e.target.value)}
+                            className="w-full bg-transparent border border-[var(--text-secondary)] px-4 py-3 focus:border-[var(--accent)] outline-none transition-colors"
+                            placeholder={t('admin.services.form.titlePlaceholder')}
+                        />
+                    </div>
+
+                    {/* Описание услуги */}
+                    <div>
+                        <label className="block text-sm font-medium mb-2">
+                            {t('admin.services.form.description')} *
+                        </label>
+                        <textarea
+                            value={currentTranslation.description}
+                            onChange={(e) => handleTranslationChange('description', e.target.value)}
+                            rows={3}
+                            className="w-full bg-transparent border border-[var(--text-secondary)] px-4 py-3 focus:border-[var(--accent)] outline-none transition-colors resize-none"
+                            placeholder={t('admin.services.form.descriptionPlaceholder')}
+                        />
+                    </div>
+
+                    {/* Детали услуги (что мы предлагаем) */}
+                    <div>
+                        <div className="flex justify-between items-center mb-2">
+                            <label className="block text-sm font-medium">
+                                {t('admin.services.form.details')} *
+                            </label>
+                            <button
+                                type="button"
+                                onClick={addDetail}
+                                className="text-[var(--accent)] text-sm hover:opacity-80 transition-opacity"
+                            >
+                                + {t('admin.services.form.addDetail')}
+                            </button>
+                        </div>
+
+                        <div className="space-y-3">
+                            {currentTranslation.details.map((detail, index) => (
+                                <div key={index} className="flex gap-2 items-center">
+                                    <span className="w-1 h-1 bg-[var(--accent)] rounded-full flex-shrink-0"></span>
+                                    <input
+                                        type="text"
+                                        value={detail}
+                                        onChange={(e) => handleDetailChange(index, e.target.value)}
+                                        className="flex-1 bg-transparent border border-[var(--text-secondary)] px-4 py-3 focus:border-[var(--accent)] outline-none transition-colors"
+                                        placeholder={t('admin.services.form.detailPlaceholder', { number: index + 1 })}
+                                    />
+                                    {currentTranslation.details.length > 1 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => removeDetail(index)}
+                                            className="text-red-500 hover:opacity-80 transition-opacity px-3 py-3"
+                                            title={t('admin.services.form.removeDetail')}
+                                        >
+                                            ×
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                        <p className="text-xs text-[var(--text-secondary)] mt-2">
+                            {t('admin.services.form.detailsHint')}
+                        </p>
+                    </div>
+
+                    {/* Изображение услуги */}
+                    <div>
+                        <label className="block text-sm font-medium mb-2">
+                            {t('admin.services.form.image')}
+                        </label>
+                        <input
+                            type="text"
+                            value={formData.image}
+                            onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
+                            className="w-full bg-transparent border border-[var(--text-secondary)] px-4 py-3 focus:border-[var(--accent)] outline-none transition-colors"
+                            placeholder="/services/service1.jpg"
+                        />
+                        <p className="text-xs text-[var(--text-secondary)] mt-1">
+                            {t('admin.services.form.imageHint')}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Кнопки действий */}
+                <div className="flex gap-4">
+                    <button
+                        onClick={handleSave}
+                        className="relative inline-flex items-center group py-4"
+                    >
+                        <div className="relative overflow-hidden">
+                            <div className="text-[var(--accent)] uppercase tracking-wide font-medium transition-transform duration-300 group-hover:-translate-y-full">
+                                {isEditing ? t('admin.services.update') : t('admin.services.save')}
+                            </div>
+                            <div className="absolute left-0 top-full text-[var(--accent)] uppercase tracking-wide font-medium transition-transform duration-300 group-hover:translate-y-[-100%]">
+                                {isEditing ? t('admin.services.update') : t('admin.services.save')}
+                            </div>
+                        </div>
+                    </button>
+
+                    <button
+                        onClick={handleCancel}
+                        className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors uppercase tracking-wide font-medium py-4"
+                    >
+                        {t('admin.services.cancel')}
+                    </button>
+                </div>
+            </div>
+        </section>
+    );
+};
+
+export default ServiceEditor;

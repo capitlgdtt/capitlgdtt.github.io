@@ -1,4 +1,5 @@
 ﻿import React, { useEffect, useState } from "react";
+import {useTheme} from "../../hooks/useTheme.ts";
 
 interface HeroSectionProps {
     id: string;
@@ -19,30 +20,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({
                                                      nextSectionId,
                                                      imagePosition = "right"
                                                  }) => {
-    const [theme, setTheme] = useState<"dark" | "light">(() => {
-        const savedTheme = localStorage.getItem("theme");
-        if (savedTheme) return savedTheme as "dark" | "light";
-
-        const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        return systemPrefersDark ? "dark" : "light";
-    });
-
     const [visible, setVisible] = useState(false);
-
-    useEffect(() => {
-        const observer = new MutationObserver(() => {
-            const currentTheme =
-                document.documentElement.getAttribute("data-theme") || "dark";
-            setTheme(currentTheme as "dark" | "light");
-        });
-
-        observer.observe(document.documentElement, {
-            attributes: true,
-            attributeFilter: ["data-theme"],
-        });
-
-        return () => observer.disconnect();
-    }, []);
+    const { theme } = useTheme();
 
     useEffect(() => {
         const timeout = setTimeout(() => setVisible(true), 200);

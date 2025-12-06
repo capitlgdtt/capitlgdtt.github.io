@@ -148,5 +148,267 @@
   },
   "company": {
     "name": "CompanyName"
+  },
+  "admin": {
+    "backToDashboard": "Back to dashboard",
+    "login": {
+      "title": "Login",
+      "username": "Username",
+      "password": "Password",
+      "submit": "Sign In",
+      "errors": {
+        "required": "Username and password are required",
+        "invalid": "Invalid username or password"
+      }
+    },
+    "dashboard": {
+      "title": "admin panel",
+      "posts": "Blog Posts",
+      "postsDesc": "Manage blog articles",
+      "team": "Team",
+      "teamDesc": "Manage team members",
+      "services": "Services",
+      "servicesDesc": "Manage company services",
+      "applications": "Applications",
+      "applicationsDesc": "View received applications",
+      "admins": "Administrators",
+      "adminsDesc": "Manage access rights",
+      "stats": "Statistics",
+      "statsDesc": "Update company statistics"
+    },
+    "posts": {
+      "title": "blog posts",
+      "create": "Create Post",
+      "edit": "Edit",
+      "delete": "Delete",
+      "createPost": "Create Post",
+      "editPost": "Edit Post",
+      "save": "Save Post",
+      "update": "Update Post",
+      "cancel": "Cancel",
+      "form": {
+        "title": "Title",
+        "titlePlaceholder": "Enter post title",
+        "excerpt": "Excerpt",
+        "excerptPlaceholder": "Brief description of the post",
+        "slug": "Slug",
+        "slugPlaceholder": "URL-friendly version of title",
+        "category": "Category",
+        "selectCategory": "Select category",
+        "categoryPlaceholder": "Enter category name",
+        "image": "Image URL",
+        "content": "Content",
+        "contentPlaceholder": "Start writing your post content...",
+        "slugManual": "(manual input)",
+        "slugAuto": "Auto",
+        "slugHintManual": "Slug is entered manually. Click 'Auto' for automatic generation.",
+        "slugHintAuto": "Slug is generated automatically when entering title."
+      },
+      "deleteConfirm": {
+        "title": "Confirm Deletion",
+        "message": "Are you sure you want to delete the post",
+        "cancel": "Cancel",
+        "confirm": "Delete",
+        "deleted": "Post deleted (stub)"
+      }
+    },
+    "team": {
+      "title": "team",
+      "add": "Add Member",
+      "edit": "Edit",
+      "delete": "Delete",
+      "editMember": "Edit Team Member",
+      "createMember": "Add Team Member",
+      "update": "Update",
+      "save": "Save",
+      "cancel": "Cancel",
+      "backToTeam": "Back to team",
+      "form": {
+        "name": "Name",
+        "namePlaceholder": "Enter full name",
+        "role": "Position",
+        "rolePlaceholder": "Enter position",
+        "email": "Email",
+        "phone": "Phone",
+        "experience": "Experience",
+        "image": "Photo URL",
+        "description": "Description",
+        "descriptionPlaceholder": "Professional description",
+        "specialization": "Specialization",
+        "specializationHint": "Select areas of expertise"
+      }
+    },
+    "services": {
+      "title": "services",
+      "add": "Add Service",
+      "edit": "Edit",
+      "delete": "Delete",
+      "editService": "Edit Service",
+      "createService": "Create Service",
+      "update": "Update",
+      "save": "Save",
+      "cancel": "Cancel",
+      "backToServices": "Back to services",
+      "form": {
+        "title": "Service Title",
+        "titlePlaceholder": "Enter service title",
+        "description": "Description",
+        "descriptionPlaceholder": "Enter service description",
+        "details": "Service Details",
+        "detailPlaceholder": "Detail #{{number}}",
+        "addDetail": "Add detail",
+        "removeDetail": "Remove detail",
+        "detailsHint": "List what you offer in this service (one per line)",
+        "image": "Image URL",
+        "imageHint": "Path to service image"
+      },
+      "deleteConfirm": {
+        "message": "Are you sure you want to delete the service",
+        "deleted": "Service deleted successfully"
+      }
+    },
+    "applications": {
+      "title": "applications",
+      "stats": {
+        "total": "Total",
+        "new": "New",
+        "inProgress": "In Progress",
+        "completed": "Completed"
+      },
+      "filters": {
+        "status": "Status",
+        "service": "Service",
+        "allStatuses": "All statuses",
+        "allServices": "All services",
+        "reset": "Reset"
+      },
+      "statusLabel": "Status",
+      "date": "Date",
+      "status": {
+        "new": "New",
+        "inProgress": "In Progress",
+        "completed": "Completed"
+      },
+      "changeStatus": "Change Status",
+      "delete": "Delete",
+      "noApplications": "No applications matching selected filters",
+      "deleteConfirm": {
+        "message": "Are you sure you want to delete the application from"
+      }
+    },
+    "admins": {
+      "title": "administrators",
+      "add": "Add Admin",
+      "edit": "Edit",
+      "delete": "Delete",
+      "createAdmin": "Create Administrator",
+      "editAdmin": "Edit Administrator",
+      "update": "Update",
+      "save": "Save",
+      "cancel": "Cancel",
+      "backToAdmins": "Back to administrators",
+      "email": "Email",
+      "created": "Created",
+      "lastLogin": "Last login",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive",
+      "neverLoggedIn": "Never logged in",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "stats": {
+        "total": "Total",
+        "superadmins": "Superadmins",
+        "admins": "Admins",
+        "editors": "Editors",
+        "active": "Active"
+      },
+      "roles": {
+        "superadmin": "Super Admin",
+        "admin": "Admin",
+        "editor": "Editor"
+      },
+      "form": {
+        "username": "Username",
+        "usernamePlaceholder": "Enter username",
+        "email": "Email",
+        "password": "Password",
+        "passwordOptional": "Password (optional)",
+        "passwordPlaceholder": "Enter password",
+        "passwordLeaveEmpty": "Leave empty to keep current",
+        "confirmPassword": "Confirm Password",
+        "confirmPasswordPlaceholder": "Confirm password",
+        "role": "Role",
+        "passwordHintEdit": "Leave empty to keep current password",
+        "passwordHintCreate": "Minimum 6 characters",
+        "roleHint": "Editor: manage content, Admin: full access except users, Superadmin: full access",
+        "errors": {
+          "required": "This field is required",
+          "minLength": "Minimum length: {{length}} characters",
+          "email": "Enter valid email",
+          "passwordsMatch": "Passwords must match",
+          "saveError": "Error saving administrator"
+        }
+      },
+      "deleteConfirm": {
+        "message": "Are you sure you want to delete administrator"
+      }
+    },
+    "stats": {
+      "title": "statistics",
+      "save": "Save Changes",
+      "saving": "Saving...",
+      "saved": "Statistics saved successfully",
+      "saveError": "Error saving statistics",
+      "reset": "Reset to Default",
+      "resetConfirm": "Are you sure you want to reset statistics to default values?",
+      "resetSuccess": "Statistics reset successfully",
+      "form": {
+        "number": "Number",
+        "label": "Label",
+        "hasPlus": "Show plus sign (+)",
+        "labelPlaceholder": "Enter label"
+      }
+    },
+    "backToPosts": "Back to posts",
+    "backToTeam": "Back to team",
+    "backToServices" : "Back to services",
+    "backToAdmins": "Back to admins"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "back": "Back",
+    "lastUpdated": "Last updated: January 2024",
+    "sections": {
+      "collection": {
+        "title": "1. Collection of Personal Information",
+        "content": "We collect personal information that you voluntarily provide when contacting us through the website form. This may include your name, email address, phone number, and message content."
+      },
+      "use": {
+        "title": "2. Use of Information",
+        "content": "The collected information is used exclusively for responding to your inquiries, providing legal consultation services, and improving our services. We do not share your personal information with third parties without your consent."
+      },
+      "protection": {
+        "title": "3. Data Protection",
+        "content": "We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction."
+      },
+      "cookies": {
+        "title": "4. Cookies",
+        "content": "Our website may use cookies to improve user experience. You can control cookie settings through your browser preferences."
+      },
+      "rights": {
+        "title": "5. Your Rights",
+        "items": {
+          "access": "Right to access your personal data",
+          "correction": "Right to correct inaccurate data",
+          "deletion": "Right to request deletion of your data",
+          "objection": "Right to object to data processing"
+        }
+      },
+      "contact": {
+        "title": "6. Contact Information",
+        "content": "If you have questions about our Privacy Policy or wish to exercise your rights, please contact us via email at privacy@company.com or by phone at +7 (495) 123-45-67."
+      }
+    }
   }
 }
