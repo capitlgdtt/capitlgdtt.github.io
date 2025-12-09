@@ -22,10 +22,9 @@ const ContactSection: React.FC = () => {
     const [ref, visible] = useVisibility(0.2);
 
     const language = (currentLanguage === 'en' || currentLanguage === 'ru') ? currentLanguage : 'ru';
-
     const blogCategories = getCategoriesByLanguage(language);
 
-    const services = Array.isArray(blogCategories) ? [...blogCategories] : [];
+    const services = [...blogCategories];
 
     // Функция валидации
     const validateForm = (values: FormData): Partial<Record<keyof FormData, string>> => {
