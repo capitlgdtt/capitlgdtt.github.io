@@ -9,7 +9,7 @@ import {
 import {getCategoriesByLanguage, translateCategory} from '../../../services/blogService.ts';
 import {Link} from "react-router-dom";
 import {useTheme} from "../../../hooks/useTheme.ts";
-import { useFilter } from '../../../hooks/useFilter'; // Добавлен импорт
+import { useFilter } from '../../../hooks/useFilter';
 
 const ApplicationsManager: React.FC = () => {
     const { t, currentLanguage } = useI18n();
@@ -17,7 +17,7 @@ const ApplicationsManager: React.FC = () => {
     const [stats, setStats] = useState(getApplicationsStats());
 
     // Получаем категории услуг для фильтра
-    const categories = ['all', ...getCategoriesByLanguage(currentLanguage as 'en' | 'ru')];
+    const categories = ['all', ...getCategoriesByLanguage((currentLanguage || 'ru') as 'en' | 'ru')];
 
     // Отслеживание темы для стилей выпадающих списков
     const { theme } = useTheme();
