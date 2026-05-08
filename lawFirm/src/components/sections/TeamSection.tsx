@@ -36,7 +36,7 @@ const TeamSection: React.FC<TeamSectionProps> = ({ teamMembers }) => {
 
                 {/* Список команды */}
                 <div className="space-y-0">
-                    {teamMembers.map((member, index) => {
+                    {teamMembers.slice(0, 4).map((member, index) => {
                         return (
                             <div
                                 key={member.id}
