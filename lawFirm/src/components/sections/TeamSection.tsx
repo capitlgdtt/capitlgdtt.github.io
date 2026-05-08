@@ -15,6 +15,10 @@ const TeamSection: React.FC<TeamSectionProps> = ({ teamMembers }) => {
     const [ref, visible] = useVisibility(0.2);
     const { theme } = useTheme();
 
+    const sortedMembers = [...teamMembers]
+        .sort((a, b) => a.id - b.id)
+        .slice(0, 4);
+
     return (
         <section
             id="team"
@@ -36,7 +40,7 @@ const TeamSection: React.FC<TeamSectionProps> = ({ teamMembers }) => {
 
                 {/* Список команды */}
                 <div className="space-y-0">
-                    {teamMembers.slice(0, 4).map((member, index) => {
+                    {sortedMembers.map((member, index) => {
                         return (
                             <div
                                 key={member.id}
