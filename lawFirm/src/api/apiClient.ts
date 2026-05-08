@@ -1,4 +1,4 @@
-﻿const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+﻿const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
 
 class ApiClient {
     private isRefreshing = false;
@@ -15,8 +15,6 @@ class ApiClient {
 
     private async handleResponse<T>(response: Response, originalRequest: () => Promise<Response>): Promise<T> {
         if (response.status === 401) {
-            console.log('401 detected, attempting to refresh');
-
             if (this.isRefreshing) {
                 return new Promise((resolve, reject) => {
                     this.refreshSubscribers.push((newToken) => {
@@ -31,17 +29,10 @@ class ApiClient {
 
             this.isRefreshing = true;
             try {
-                console.log('Fetching /auth/refresh...');
-
                 const refreshRes = await fetch(`${API_BASE}/auth/refresh`, {
                     method: 'POST',
                     credentials: 'include',
                 });
-                console.log('Refresh status:', refreshRes.status);
-
-                const refreshText = await refreshRes.text();
-                console.log('Refresh body:', refreshText);
-
                 if (!refreshRes.ok) throw new Error('Refresh failed');
                 const data = await refreshRes.json();
                 const access_token = data.access_token || (data.data && data.data.access_token);
@@ -50,16 +41,10 @@ class ApiClient {
                 this.refreshSubscribers.forEach(cb => cb(access_token));
                 this.refreshSubscribers = [];
                 const retryRes = await originalRequest();
-
-                if (!retryRes.ok) {
-                    console.log('Retry failed, status:', retryRes.status);
-                }
-
                 return this.handleResponse<T>(retryRes, originalRequest);
             } catch (error) {
                 localStorage.removeItem('access_token');
-                //window.location.href = '/admin/login';
-                console.error('Redirect');
+                window.location.href = '/admin/login';
                 throw error;
             } finally {
                 this.isRefreshing = false;
