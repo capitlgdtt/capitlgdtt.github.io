@@ -2,10 +2,12 @@
 
 export interface TeamMember {
     id: number;
-    translations: {
-        en: { name: string; role: string; description: string };
-        ru: { name: string; role: string; description: string };
-    };
+    name_en: string;
+    name_ru: string;
+    role_en: string;
+    role_ru: string;
+    description_en: string;
+    description_ru: string;
     image: string;
     email: string;
     phone: string;

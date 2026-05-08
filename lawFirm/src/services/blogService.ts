@@ -2,10 +2,12 @@
 
 export interface BlogPost {
     id: number;
-    translations: {
-        en: { title: string; excerpt: string; content: string };
-        ru: { title: string; excerpt: string; content: string };
-    };
+    title_en: string;
+    title_ru: string;
+    excerpt_en: string;
+    excerpt_ru: string;
+    content_en: string;
+    content_ru: string;
     image: string;
     category: string;
     date: string;

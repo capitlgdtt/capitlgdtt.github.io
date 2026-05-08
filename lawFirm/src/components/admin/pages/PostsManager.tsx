@@ -1,8 +1,7 @@
 ﻿import React, { useEffect, useState } from 'react';
 import { useI18n } from '../../../hooks/useI18n';
-import { fetchPosts, deletePost } from '../../../services/blogService';
+import {fetchPosts, deletePost, type BlogPost} from '../../../services/blogService';
 import { Link } from 'react-router-dom';
-import type { BlogPost } from '../../../types';
 
 const PostsManager: React.FC = () => {
     const { t, currentLanguage } = useI18n();
@@ -27,7 +26,11 @@ const PostsManager: React.FC = () => {
     };
 
     const getCurrentTranslation = (post: BlogPost) => {
-        return post.translations[currentLanguage as 'en' | 'ru'] || post.translations.en;
+        const lang = currentLanguage as 'en' | 'ru';
+        return {
+            title: lang === 'en' ? post.title_en : post.title_ru,
+            excerpt: lang === 'en' ? post.excerpt_en : post.excerpt_ru,
+        };
     };
 
     const handleDeletePost = async (postId: number, postTitle: string) => {

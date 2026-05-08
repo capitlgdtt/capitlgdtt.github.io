@@ -1,7 +1,6 @@
 ﻿import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../../hooks/useI18n';
-import type { PostFormData } from '../../../../types/admin.types';
 import LanguageTabs from '../../editor/LanguageTabs';
 import RichTextEditor from '../../editor/RichTextEditor';
 import { useDebounce } from '../../../../hooks/useDebounce';
@@ -24,7 +23,7 @@ const PostEditor: React.FC = () => {
         const loadCategories = async () => {
             try {
                 const services = await fetchServices();
-                const uniqueCategories = services.map(s => s.translations.en.title);
+                const uniqueCategories = services.map(s => s.title_en);
                 setCategories(uniqueCategories);
                 if (formData.category === '' && uniqueCategories.length) {
                     setFormData(prev => ({ ...prev, category: uniqueCategories[0] }));
@@ -36,19 +35,28 @@ const PostEditor: React.FC = () => {
         loadCategories();
     }, []);
 
-    const [formData, setFormData] = useState<PostFormData>({
-        translations: {
-            en: { title: '', excerpt: '', content: '' },
-            ru: { title: '', excerpt: '', content: '' }
-        },
+    const [formData, setFormData] = useState({
+        title_en: '',
+        title_ru: '',
+        excerpt_en: '',
+        excerpt_ru: '',
+        content_en: '',
+        content_ru: '',
         image: '',
-        category: categories[0],
+        category: '',
         slug: '',
+        date: '',
         currentLanguage: siteLanguage as 'en' | 'ru'
     });
 
     const [isSlugManual, setIsSlugManual] = useState(false);
-    const currentTitle = formData.translations[formData.currentLanguage].title;
+
+    const getCurrentValue = (field: 'title' | 'excerpt' | 'content') => {
+        const lang = formData.currentLanguage;
+        return formData[`${field}_${lang}` as keyof typeof formData] as string;
+    };
+
+    const currentTitle = getCurrentValue('title');
     const debouncedTitle = useDebounce(currentTitle, 500);
 
     const [uploading, setUploading] = useState(false);
@@ -81,10 +89,16 @@ const PostEditor: React.FC = () => {
                 try {
                     const post = await fetchPostById(postId);
                     setFormData({
-                        translations: post.translations,
+                        title_en: post.title_en,
+                        title_ru: post.title_ru,
+                        excerpt_en: post.excerpt_en,
+                        excerpt_ru: post.excerpt_ru,
+                        content_en: post.content_en,
+                        content_ru: post.content_ru,
                         image: post.image,
                         category: post.category,
                         slug: post.slug,
+                        date: post.date,
                         currentLanguage: siteLanguage as 'en' | 'ru'
                     });
                 } catch (err) {
@@ -104,15 +118,10 @@ const PostEditor: React.FC = () => {
     }, [debouncedTitle, formData.slug, isSlugManual]);
 
     const handleTranslationChange = (field: 'title' | 'excerpt' | 'content', value: string) => {
+        const lang = formData.currentLanguage;
         setFormData(prev => ({
             ...prev,
-            translations: {
-                ...prev.translations,
-                [prev.currentLanguage]: {
-                    ...prev.translations[prev.currentLanguage],
-                    [field]: value
-                }
-            }
+            [`${field}_${lang}`]: value
         }));
     };
 
@@ -131,22 +140,25 @@ const PostEditor: React.FC = () => {
 
     const handleSave = async () => {
         const postData = {
-            translations: formData.translations,
+            title_en: formData.title_en,
+            title_ru: formData.title_ru,
+            excerpt_en: formData.excerpt_en,
+            excerpt_ru: formData.excerpt_ru,
+            content_en: formData.content_en,
+            content_ru: formData.content_ru,
             image: formData.image || '/blog/default.jpg',
             category: formData.category,
-            slug: formData.slug || generateSlug(currentTitle)
+            date: isEditing ? formData.date : new Date().toISOString().split('T')[0],
+            slug: formData.slug || generateSlug(formData[`title_${formData.currentLanguage}` as keyof typeof formData] as string)
         };
-
         try {
-            if (isEditing && postId) {
-                await updatePost(postId, postData);
-            } else {
-                await createPost(postData);
-            }
+            if (isEditing && postId) await updatePost(postId, postData);
+            else await createPost(postData);
             navigate('/admin/posts');
-        } catch (err) {
+        } catch (err: any) {
             console.error('Save failed', err);
-            alert('Ошибка сохранения');
+            const message = err.message || t('common.error');
+            alert(message);
         }
     };
 
@@ -176,8 +188,6 @@ const PostEditor: React.FC = () => {
             .replace(/^-+/, '')
             .replace(/-+$/, '');
     };
-
-    const currentTranslation = formData.translations[formData.currentLanguage];
 
     return (
         <section
@@ -223,7 +233,7 @@ const PostEditor: React.FC = () => {
                         <label className="block text-sm font-medium mb-2">{t('admin.posts.form.title')} *</label>
                         <input
                             type="text"
-                            value={currentTranslation.title}
+                            value={getCurrentValue('title')}
                             onChange={(e) => handleTranslationChange('title', e.target.value)}
                             className="w-full bg-transparent border border-[var(--text-secondary)] px-4 py-3 focus:border-[var(--accent)] outline-none transition-colors"
                             placeholder={t('admin.posts.form.titlePlaceholder')}
@@ -246,7 +256,7 @@ const PostEditor: React.FC = () => {
                             <button
                                 type="button"
                                 onClick={() => {
-                                    const newSlug = generateSlug(currentTranslation.title);
+                                    const newSlug = generateSlug(getCurrentValue('title'));
                                     handleSlugChange(newSlug);
                                     setIsSlugManual(false);
                                 }}
@@ -264,7 +274,7 @@ const PostEditor: React.FC = () => {
                     <div>
                         <label className="block text-sm font-medium mb-2">{t('admin.posts.form.excerpt')} *</label>
                         <textarea
-                            value={currentTranslation.excerpt}
+                            value={getCurrentValue('excerpt')}
                             onChange={(e) => handleTranslationChange('excerpt', e.target.value)}
                             rows={3}
                             className="w-full bg-transparent border border-[var(--text-secondary)] px-4 py-3 focus:border-[var(--accent)] outline-none transition-colors resize-none"
@@ -322,7 +332,7 @@ const PostEditor: React.FC = () => {
                     <div>
                         <label className="block text-sm font-medium mb-2">{t('admin.posts.form.content')} *</label>
                         <RichTextEditor
-                            content={currentTranslation.content}
+                            content={getCurrentValue('content')}
                             onChange={handleContentChange}
                             placeholder={t('admin.posts.form.contentPlaceholder')}
                         />

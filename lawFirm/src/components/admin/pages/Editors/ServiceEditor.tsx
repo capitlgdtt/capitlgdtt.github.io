@@ -14,10 +14,12 @@ const ServiceEditor: React.FC = () => {
     const serviceId = id ? parseInt(id) : undefined;
 
     const [formData, setFormData] = useState({
-        translations: {
-            en: { title: '', description: '', details: [''] },
-            ru: { title: '', description: '', details: [''] }
-        },
+        title_en: '',
+        title_ru: '',
+        description_en: '',
+        description_ru: '',
+        details_en: [''],
+        details_ru: [''],
         image: '',
         currentLanguage: siteLanguage as 'en' | 'ru'
     });
@@ -52,7 +54,12 @@ const ServiceEditor: React.FC = () => {
                 try {
                     const service = await fetchServiceById(serviceId);
                     setFormData({
-                        translations: service.translations,
+                        title_en: service.title_en,
+                        title_ru: service.title_ru,
+                        description_en: service.description_en,
+                        description_ru: service.description_ru,
+                        details_en: service.details_en,
+                        details_ru: service.details_ru,
                         image: service.image,
                         currentLanguage: siteLanguage as 'en' | 'ru'
                     });
@@ -68,64 +75,38 @@ const ServiceEditor: React.FC = () => {
     }, [isEditing, serviceId, siteLanguage]);
 
     const handleTranslationChange = (field: 'title' | 'description', value: string) => {
-        setFormData(prev => ({
-            ...prev,
-            translations: {
-                ...prev.translations,
-                [prev.currentLanguage]: {
-                    ...prev.translations[prev.currentLanguage],
-                    [field]: value
-                }
-            }
-        }));
+        const lang = formData.currentLanguage;
+        setFormData(prev => ({ ...prev, [`${field}_${lang}`]: value }));
     };
 
     const handleDetailChange = (index: number, value: string) => {
+        const lang = formData.currentLanguage;
+        const key = `details_${lang}` as keyof typeof formData;
         setFormData(prev => {
-            const newDetails = [...prev.translations[prev.currentLanguage].details];
+            const newDetails = [...(prev[key] as string[])];
             newDetails[index] = value;
-            return {
-                ...prev,
-                translations: {
-                    ...prev.translations,
-                    [prev.currentLanguage]: {
-                        ...prev.translations[prev.currentLanguage],
-                        details: newDetails
-                    }
-                }
-            };
+            return { ...prev, [key]: newDetails };
         });
     };
 
     const addDetail = () => {
+        const lang = formData.currentLanguage;
+        const key = `details_${lang}` as keyof typeof formData;
         setFormData(prev => ({
             ...prev,
-            translations: {
-                ...prev.translations,
-                [prev.currentLanguage]: {
-                    ...prev.translations[prev.currentLanguage],
-                    details: [...prev.translations[prev.currentLanguage].details, '']
-                }
-            }
+            [key]: [...(prev[key] as string[]), '']
         }));
     };
 
     const removeDetail = (index: number) => {
-        const currentDetails = formData.translations[formData.currentLanguage].details;
-        if (currentDetails.length > 1) {
-            setFormData(prev => {
-                const newDetails = currentDetails.filter((_, i) => i !== index);
-                return {
-                    ...prev,
-                    translations: {
-                        ...prev.translations,
-                        [prev.currentLanguage]: {
-                            ...prev.translations[prev.currentLanguage],
-                            details: newDetails
-                        }
-                    }
-                };
-            });
+        const lang = formData.currentLanguage;
+        const key = `details_${lang}` as keyof typeof formData;
+        const current = formData[key] as string[];
+        if (current.length > 1) {
+            setFormData(prev => ({
+                ...prev,
+                [key]: current.filter((_, i) => i !== index)
+            }));
         }
     };
 
@@ -135,7 +116,12 @@ const ServiceEditor: React.FC = () => {
 
     const handleSave = async () => {
         const serviceData = {
-            translations: formData.translations,
+            title_en: formData.title_en,
+            title_ru: formData.title_ru,
+            description_en: formData.description_en,
+            description_ru: formData.description_ru,
+            details_en: formData.details_en,
+            details_ru: formData.details_ru,
             image: formData.image || '/services/default.jpg'
         };
 
@@ -146,9 +132,10 @@ const ServiceEditor: React.FC = () => {
                 await createService(serviceData);
             }
             navigate('/admin/services');
-        } catch (err) {
+        } catch (err: any) {
             console.error('Save failed', err);
-            alert('Ошибка сохранения');
+            const message = err.message || t('common.error');
+            alert(message);
         }
     };
 
@@ -156,7 +143,12 @@ const ServiceEditor: React.FC = () => {
         navigate('/admin/services');
     };
 
-    const currentTranslation = formData.translations[formData.currentLanguage];
+    const getCurrentValue = (field: 'title' | 'description' | 'details') => {
+        const lang = formData.currentLanguage;
+        return field === 'details'
+            ? formData[`details_${lang}`]
+            : formData[`${field}_${lang}`];
+    };
 
     if (loading) {
         return <div className="text-center py-10">Загрузка...</div>;
@@ -209,7 +201,7 @@ const ServiceEditor: React.FC = () => {
                         <label className="block text-sm font-medium mb-2">{t('admin.services.form.title')} *</label>
                         <input
                             type="text"
-                            value={currentTranslation.title}
+                            value={getCurrentValue('title')}
                             onChange={(e) => handleTranslationChange('title', e.target.value)}
                             className="w-full bg-transparent border border-[var(--text-secondary)] px-4 py-3 focus:border-[var(--accent)] outline-none transition-colors"
                             placeholder={t('admin.services.form.titlePlaceholder')}
@@ -219,7 +211,7 @@ const ServiceEditor: React.FC = () => {
                     <div>
                         <label className="block text-sm font-medium mb-2">{t('admin.services.form.description')} *</label>
                         <textarea
-                            value={currentTranslation.description}
+                            value={getCurrentValue('description')}
                             onChange={(e) => handleTranslationChange('description', e.target.value)}
                             rows={3}
                             className="w-full bg-transparent border border-[var(--text-secondary)] px-4 py-3 focus:border-[var(--accent)] outline-none transition-colors resize-none"
@@ -240,7 +232,7 @@ const ServiceEditor: React.FC = () => {
                         </div>
 
                         <div className="space-y-3">
-                            {currentTranslation.details.map((detail, index) => (
+                            {(getCurrentValue('details') as string[]).map((detail: string, index: number) => (
                                 <div key={index} className="flex gap-2 items-center">
                                     <span className="w-1 h-1 bg-[var(--accent)] rounded-full flex-shrink-0"></span>
                                     <input
@@ -250,7 +242,7 @@ const ServiceEditor: React.FC = () => {
                                         className="flex-1 bg-transparent border border-[var(--text-secondary)] px-4 py-3 focus:border-[var(--accent)] outline-none transition-colors"
                                         placeholder={t('admin.services.form.detailPlaceholder', { number: index + 1 })}
                                     />
-                                    {currentTranslation.details.length > 1 && (
+                                    {getCurrentValue('details').length > 1 && (
                                         <button
                                             type="button"
                                             onClick={() => removeDetail(index)}

@@ -6,19 +6,10 @@ import {
     updateApplicationStatus,
     fetchApplicationsStats, type Application
 } from '../../../services/applicationService';
-import { fetchServices } from '../../../services/serviceService';
+import {fetchServices, type Service} from '../../../services/serviceService';
 import { Link } from "react-router-dom";
 import { useTheme } from "../../../hooks/useTheme";
 import { useFilter } from '../../../hooks/useFilter';
-
-interface Service {
-    id: number;
-    translations: {
-        en: { title: string };
-        ru: { title: string };
-    };
-    // ... другие поля не нужны для фильтра
-}
 
 const ApplicationsManager: React.FC = () => {
     const { t, currentLanguage } = useI18n();
@@ -70,8 +61,8 @@ const ApplicationsManager: React.FC = () => {
 
             // Формируем список категорий для фильтра на основе загруженных услуг
             const categoriesList = servicesData.map((service: Service) => ({
-                value: service.translations.en.title,   // английское название – ключ для фильтра
-                label: service.translations[currentLanguage as 'en' | 'ru']?.title || service.translations.en.title
+                value: service.title_en,   // английское название (ключ)
+                label: currentLanguage === 'en' ? service.title_en : service.title_ru
             }));
             setCategories([{ value: 'all', label: t('admin.applications.filters.allServices') }, ...categoriesList]);
         } catch (err: any) {

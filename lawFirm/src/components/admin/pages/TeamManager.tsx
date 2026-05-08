@@ -1,8 +1,7 @@
 ﻿import React, { useEffect, useState } from 'react';
 import { useI18n } from '../../../hooks/useI18n';
-import { fetchTeamMembers, deleteTeamMember } from '../../../services/teamService';
+import {fetchTeamMembers, deleteTeamMember, type TeamMember} from '../../../services/teamService';
 import { Link } from 'react-router-dom';
-import type { TeamMember } from '../../../types';
 
 const TeamManager: React.FC = () => {
     const { t, currentLanguage } = useI18n();
@@ -28,12 +27,11 @@ const TeamManager: React.FC = () => {
 
     const getMemberForDisplay = (member: TeamMember) => {
         const lang = currentLanguage as 'en' | 'ru';
-        const translation = member.translations[lang] || member.translations.en;
         return {
             ...member,
-            name: translation.name,
-            role: translation.role,
-            description: translation.description,
+            name: lang === 'en' ? member.name_en : member.name_ru,
+            role: lang === 'en' ? member.role_en : member.role_ru,
+            description: lang === 'en' ? member.description_en : member.description_ru,
             specialization: member.specialization,
         };
     };

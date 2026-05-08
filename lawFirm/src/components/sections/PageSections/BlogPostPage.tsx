@@ -44,9 +44,9 @@ const BlogPostPage: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] flex items-center justify-center">
-                <div className="text-center">Загрузка...</div>
-            </div>
+            <section className="relative bg-[var(--bg-primary)] text-[var(--text-primary)] min-h-screen flex items-center justify-center">
+                <div>{t('common.loading')}</div>
+            </section>
         );
     }
 

@@ -1,8 +1,7 @@
 ﻿import React, { useEffect, useState } from 'react';
 import { useI18n } from '../../../hooks/useI18n';
-import { fetchServices, deleteService } from '../../../services/serviceService';
+import {fetchServices, deleteService, type Service} from '../../../services/serviceService';
 import { Link } from 'react-router-dom';
-import type { Service } from '../../../types';
 
 const ServicesManager: React.FC = () => {
     const { t, currentLanguage } = useI18n();
@@ -27,7 +26,12 @@ const ServicesManager: React.FC = () => {
     };
 
     const getCurrentTranslation = (service: Service) => {
-        return service.translations[currentLanguage as 'en' | 'ru'] || service.translations.en;
+        const lang = currentLanguage as 'en' | 'ru';
+        return {
+            title: lang === 'en' ? service.title_en : service.title_ru,
+            description: lang === 'en' ? service.description_en : service.description_ru,
+            details: lang === 'en' ? service.details_en : service.details_ru,
+        };
     };
 
     const handleDeleteService = async (serviceId: number, serviceTitle: string) => {

@@ -2,10 +2,12 @@
 
 export interface Service {
     id: number;
-    translations: {
-        en: { title: string; description: string; details: string[] };
-        ru: { title: string; description: string; details: string[] };
-    };
+    title_en: string;
+    title_ru: string;
+    description_en: string;
+    description_ru: string;
+    details_en: string[];
+    details_ru: string[];
     image: string;
 }
 

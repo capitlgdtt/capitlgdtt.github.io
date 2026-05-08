@@ -21,15 +21,17 @@ const TeamEditor: React.FC = () => {
     const memberId = id ? parseInt(id) : undefined;
 
     const [formData, setFormData] = useState({
-        translations: {
-            en: { name: '', role: '', description: '' },
-            ru: { name: '', role: '', description: '' }
-        },
+        name_en: '',
+        name_ru: '',
+        role_en: '',
+        role_ru: '',
+        description_en: '',
+        description_ru: '',
         image: '',
         email: '',
         phone: '',
         experience: '',
-        specialization: [] as string[], // массив английских ключей услуг
+        specialization: [] as string[],
         currentLanguage: siteLanguage as 'en' | 'ru'
     });
 
@@ -44,8 +46,8 @@ const TeamEditor: React.FC = () => {
                 const data = await fetchServices();
                 const list = data.map(s => ({
                     id: s.id,
-                    key: s.translations.en.title,
-                    title: s.translations[siteLanguage as 'en' | 'ru']?.title || s.translations.en.title,
+                    key: s.title_en,
+                    title: siteLanguage === 'en' ? s.title_en : s.title_ru,
                 }));
                 setServices(list);
             } catch (err) {
@@ -64,7 +66,12 @@ const TeamEditor: React.FC = () => {
                 try {
                     const member = await fetchTeamMemberById(memberId);
                     setFormData({
-                        translations: member.translations,
+                        name_en: member.name_en,
+                        name_ru: member.name_ru,
+                        role_en: member.role_en,
+                        role_ru: member.role_ru,
+                        description_en: member.description_en,
+                        description_ru: member.description_ru,
                         image: member.image,
                         email: member.email,
                         phone: member.phone,
@@ -97,15 +104,10 @@ const TeamEditor: React.FC = () => {
     };
 
     const handleTranslationChange = (field: 'name' | 'role' | 'description', value: string) => {
+        const lang = formData.currentLanguage;
         setFormData(prev => ({
             ...prev,
-            translations: {
-                ...prev.translations,
-                [prev.currentLanguage]: {
-                    ...prev.translations[prev.currentLanguage],
-                    [field]: value
-                }
-            }
+            [`${field}_${lang}`]: value
         }));
     };
 
@@ -128,7 +130,12 @@ const TeamEditor: React.FC = () => {
 
     const handleSave = async () => {
         const memberData = {
-            translations: formData.translations,
+            name_en: formData.name_en,
+            name_ru: formData.name_ru,
+            role_en: formData.role_en,
+            role_ru: formData.role_ru,
+            description_en: formData.description_en,
+            description_ru: formData.description_ru,
             image: formData.image || '/team/default.jpg',
             email: formData.email,
             phone: formData.phone,
@@ -143,9 +150,10 @@ const TeamEditor: React.FC = () => {
                 await createTeamMember(memberData);
             }
             navigate('/admin/team');
-        } catch (err) {
+        } catch (err: any) {
             console.error('Save failed', err);
-            alert('Ошибка сохранения');
+            const message = err.message || t('common.error');
+            alert(message);
         }
     };
 
@@ -153,7 +161,10 @@ const TeamEditor: React.FC = () => {
         navigate('/admin/team');
     };
 
-    const currentTranslation = formData.translations[formData.currentLanguage];
+    const getCurrentValue = (field: 'name' | 'role' | 'description') => {
+        const lang = formData.currentLanguage;
+        return formData[`${field}_${lang}` as keyof typeof formData] as string;
+    };
 
     return (
         <section
@@ -202,7 +213,7 @@ const TeamEditor: React.FC = () => {
                         <label className="block text-sm font-medium mb-2">{t('admin.team.form.name')} *</label>
                         <input
                             type="text"
-                            value={currentTranslation.name}
+                            value={getCurrentValue('name')}
                             onChange={(e) => handleTranslationChange('name', e.target.value)}
                             className="w-full bg-transparent border border-[var(--text-secondary)] px-4 py-3 focus:border-[var(--accent)] outline-none transition-colors"
                             placeholder={t('admin.team.form.namePlaceholder')}
@@ -213,7 +224,7 @@ const TeamEditor: React.FC = () => {
                         <label className="block text-sm font-medium mb-2">{t('admin.team.form.role')} *</label>
                         <input
                             type="text"
-                            value={currentTranslation.role}
+                            value={getCurrentValue('role')}
                             onChange={(e) => handleTranslationChange('role', e.target.value)}
                             className="w-full bg-transparent border border-[var(--text-secondary)] px-4 py-3 focus:border-[var(--accent)] outline-none transition-colors"
                             placeholder={t('admin.team.form.rolePlaceholder')}
@@ -274,7 +285,7 @@ const TeamEditor: React.FC = () => {
                     <div>
                         <label className="block text-sm font-medium mb-2">{t('admin.team.form.description')} *</label>
                         <textarea
-                            value={currentTranslation.description}
+                            value={getCurrentValue('description')}
                             onChange={(e) => handleTranslationChange('description', e.target.value)}
                             rows={4}
                             className="w-full bg-transparent border border-[var(--text-secondary)] px-4 py-3 focus:border-[var(--accent)] outline-none transition-colors resize-none"

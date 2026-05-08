@@ -5,7 +5,7 @@ export interface HomePageData {
     blogPosts: any[];
     teamMembers: any[];
 }
-
 export const getHomePageData = async (lang: string): Promise<HomePageData> => {
-    return apiClient.get(`/bff/home?lang=${lang}`, false);
+    const response = await apiClient.get(`/bff/home?lang=${lang}`, false);
+    return (response as any).data || response;
 };
