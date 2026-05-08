@@ -43,7 +43,11 @@ const HomePage: React.FC = () => {
     }
 
     if (error) {
-        return <div className="text-red-500 text-center py-10">{error}</div>;
+        return (
+            <section className="relative bg-[var(--bg-primary)] text-[var(--text-primary)] text-red-500 min-h-screen flex items-center justify-center">
+                <div>{error}</div>
+            </section>
+        );
     }
 
     return (
