@@ -1,40 +1,25 @@
 ﻿import React from "react";
-import { useI18n } from "../../../hooks/useI18n.ts";
-import { Marquee } from "@/registry/magicui/marquee"
+import { useI18n } from "../../../hooks/useI18n";
+import { ReviewCard } from "./ReviewCard";
+import type { Review } from "../../../types";
 
 interface MarqueeReviewsProps {
     reviews: Review[];
-    reverse?: boolean;
     className?: string;
 }
 
-export const MarqueeReviews: React.FC<MarqueeReviewsProps> = ({
-                                                                  reviews,
-                                                                  reverse = false,
-                                                                  className = ""
-                                                              }) => {
+export const MarqueeReviews: React.FC<MarqueeReviewsProps> = ({ reviews, className = "" }) => {
     const { currentLanguage } = useI18n();
 
-    const duplicatedReviews = [...reviews, ...reviews, ...reviews];
+    if (reviews.length === 0) return null;
 
     return (
-        <Marquee
-            pauseOnHover
-            reverse={reverse}
-            className={`${className} py-4`}
-            innerClassName="gap-6 md:gap-8"
-        >
-            {duplicatedReviews.map((review, index) => (
-                <div
-                    key={`${review.id}-${index}`}
-                    className="mx-2"
-                >
-                    <ReviewCard
-                        review={review}
-                        language={currentLanguage}
-                    />
+        <div className={`flex overflow-x-auto gap-6 md:gap-8 py-4 ${className}`}>
+            {reviews.map((review, index) => (
+                <div key={`${review.id}-${index}`} className="flex-shrink-0 w-80">
+                    <ReviewCard review={review} language={currentLanguage} />
                 </div>
             ))}
-        </Marquee>
+        </div>
     );
 };
