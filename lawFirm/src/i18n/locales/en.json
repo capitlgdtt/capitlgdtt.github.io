@@ -1,4 +1,8 @@
 ﻿{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error"
+  },
   "nav": {
     "home": "Home",
     "expertises": "Expertises",
@@ -355,6 +359,8 @@
       }
     },
     "stats": {
+      "add": "Add statistic",
+      "delete" : "Remove",
       "title": "statistics",
       "save": "Save Changes",
       "saving": "Saving...",
@@ -364,6 +370,8 @@
       "resetConfirm": "Are you sure you want to reset statistics to default values?",
       "resetSuccess": "Statistics reset successfully",
       "form": {
+        "labelEn": "Label (EN)",
+        "labelRu": "Label (RU)",
         "number": "Number",
         "label": "Label",
         "hasPlus": "Show plus sign (+)",

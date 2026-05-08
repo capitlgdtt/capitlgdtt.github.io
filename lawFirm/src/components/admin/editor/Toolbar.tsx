@@ -1,5 +1,6 @@
 ﻿import React, { useEffect, useState } from 'react';
 import { Editor } from '@tiptap/react';
+import { apiClient } from '../../../api/apiClient';
 
 interface ToolbarProps {
     editor: Editor;
@@ -19,7 +20,6 @@ const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
         link: false,
     });
 
-    // Следим за изменениями состояния редактора
     useEffect(() => {
         if (!editor) return;
 
@@ -38,7 +38,6 @@ const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
             });
         };
 
-        // Подписываемся на события редактора
         editor.on('transaction', updateState);
         editor.on('selectionUpdate', updateState);
         editor.on('update', updateState);
@@ -54,24 +53,27 @@ const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
         return null;
     }
 
-    const addImage = () => {
-        const url = window.prompt('URL изображения:');
-
-        if (url) {
-            // Проверяем, что URL валидный
-            if (url.startsWith('http') || url.startsWith('/') || url.startsWith('./')) {
+    const addImage = async () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/jpeg,image/png,image/webp';
+        input.onchange = async (e) => {
+            const file = (e.target as HTMLInputElement).files?.[0];
+            if (!file) return;
+            try {
+                const { url } = await apiClient.uploadFile(file);
                 editor.chain().focus().setImage({ src: url }).run();
-            } else {
-                alert('Пожалуйста, введите корректный URL (начинается с http, / или ./)');
+            } catch (err) {
+                console.error('Upload failed', err);
+                alert('Ошибка загрузки изображения');
             }
-        }
+        };
+        input.click();
     };
 
     const setLink = () => {
         const url = window.prompt('URL:');
-        if (url === null) {
-            return;
-        }
+        if (url === null) return;
         if (url === '') {
             editor.chain().focus().unsetLink().run();
             return;
@@ -170,7 +172,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
                 Link
             </button>
 
-            {/* Изображение */}
+            {/* Изображение (загрузка через Cloudinary) */}
             <button
                 onClick={addImage}
                 className="p-2 rounded hover:bg-[var(--bg-secondary)] transition-colors"

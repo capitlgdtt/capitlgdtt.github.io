@@ -2,20 +2,41 @@
 import { useI18n } from '../../../hooks/useI18n';
 import { Link } from 'react-router-dom';
 import {
-    getAdmins,
+    fetchAdmins,
     deleteAdmin,
-    toggleAdminStatus,
-    getAdminsStats
+    updateAdminStatus,
+    fetchAdminsStats, type AdminStats, type Admin
 } from '../../../services/adminService';
 
 const AdminsManager: React.FC = () => {
     const { t } = useI18n();
-    const [admins, setAdmins] = useState(getAdmins());
-    const [stats, setStats] = useState(getAdminsStats());
+    const [admins, setAdmins] = useState<Admin[]>([]);
+    const [stats, setStats] = useState<AdminStats>({
+        total: 0, active: 0, superadmins: 0, admins: 0, editors: 0
+    });
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    const loadData = async () => {
+        setLoading(true);
+        setError('');
+        try {
+            const [adminsData, statsData] = await Promise.all([
+                fetchAdmins(),
+                fetchAdminsStats()
+            ]);
+            setAdmins(adminsData);
+            setStats(statsData);
+        } catch (err: any) {
+            setError(err.message || 'Ошибка загрузки');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        setStats(getAdminsStats());
-    }, [admins]);
+        loadData();
+    }, []);
 
     const getRoleColor = (role: string) => {
         switch (role) {
@@ -35,29 +56,46 @@ const AdminsManager: React.FC = () => {
         }
     };
 
-    const handleDeleteAdmin = (id: number, username: string) => {
+    const handleDeleteAdmin = async (id: number, username: string) => {
         const confirmed = window.confirm(
             `${t('admin.admins.deleteConfirm.message')} "${username}"?`
         );
+        if (!confirmed) return;
 
-        if (confirmed) {
-            try {
-                const success = deleteAdmin(id);
-                if (success) {
-                    setAdmins(getAdmins());
-                }
-            } catch (error: any) {
-                alert(error.message);
-            }
+        try {
+            await deleteAdmin(id);
+            await loadData();
+        } catch (err: any) {
+            alert(err.message);
         }
     };
 
-    const handleToggleStatus = (id: number) => {
-        const updated = toggleAdminStatus(id);
-        if (updated) {
-            setAdmins(getAdmins());
+    const handleToggleStatus = async (id: number) => {
+        const admin = admins.find(a => a.id === id);
+        if (!admin) return;
+        try {
+            await updateAdminStatus(id, !admin.isActive);
+            await loadData();
+        } catch (err: any) {
+            alert(err.message);
         }
     };
+
+    if (loading) {
+        return (
+            <section className="relative bg-[var(--bg-primary)] text-[var(--text-primary)] min-h-screen flex items-center justify-center">
+                <div>{t('common.loading')}</div>
+            </section>
+        );
+    }
+
+    if (error) {
+        return (
+            <section className="relative bg-[var(--bg-primary)] text-[var(--text-primary)] min-h-screen flex items-center justify-center">
+                <div className="text-red-500">{error}</div>
+            </section>
+        );
+    }
 
     return (
         <section
@@ -68,7 +106,6 @@ const AdminsManager: React.FC = () => {
             }}
         >
             <div className="max-w-[1920px] mx-auto w-full">
-                {/* Заголовок */}
                 <div className="overflow-hidden mb-6">
                     <h2 className="text-[2rem] sm:text-[2.5rem] md:text-[3rem] lg:text-[4rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
                         {t('admin.admins.title')}
@@ -76,11 +113,7 @@ const AdminsManager: React.FC = () => {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-x-8 gap-y-4 mb-6">
-                    {/* Кнопка возврата */}
-                    <Link
-                        to="/admin"
-                        className="relative inline-flex items-center group py-4"
-                    >
+                    <Link to="/admin" className="relative inline-flex items-center group py-4">
                         <img
                             src="/arrow_details.svg"
                             alt="arrow"
@@ -100,11 +133,7 @@ const AdminsManager: React.FC = () => {
                         </div>
                     </Link>
 
-                    {/* Кнопка добавления */}
-                    <Link
-                        to="/admin/admins/create"
-                        className="relative inline-flex items-center group py-4"
-                    >
+                    <Link to="/admin/admins/create" className="relative inline-flex items-center group py-4">
                         <div className="relative overflow-hidden">
                             <div className="text-[var(--accent)] uppercase tracking-wide font-medium transition-transform duration-300 group-hover:-translate-y-full">
                                 {t('admin.admins.add')}
@@ -195,7 +224,6 @@ const AdminsManager: React.FC = () => {
                                     </div>
                                 </Link>
 
-                                {/* Активация/деактивация */}
                                 {admin.role !== 'superadmin' && (
                                     <button
                                         onClick={() => handleToggleStatus(admin.id)}
@@ -207,7 +235,6 @@ const AdminsManager: React.FC = () => {
                                     </button>
                                 )}
 
-                                {/* Удаление */}
                                 {admin.role !== 'superadmin' && (
                                     <button
                                         onClick={() => handleDeleteAdmin(admin.id, admin.username)}

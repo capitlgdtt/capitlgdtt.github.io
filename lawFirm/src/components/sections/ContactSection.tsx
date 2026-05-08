@@ -1,12 +1,12 @@
-﻿import React, { useEffect } from "react";
-import { useI18n } from "../../hooks/useI18n.ts";
-import DecorativeLine from "../common/DecorativeLine.tsx";
-import { getCategoriesByLanguage } from "../../services/blogService.ts";
-import { createApplication } from "../../services/applicationService.ts";
+﻿import React, { useEffect, useState } from "react";
+import { useI18n } from "../../hooks/useI18n";
+import DecorativeLine from "../common/DecorativeLine";
+import { createApplication } from "../../services/applicationService";
+import { fetchPublicServices } from "../../services/serviceService";
 import { Link } from "react-router-dom";
-import { useTheme } from "../../hooks/useTheme.ts";
-import { useVisibility } from "../../hooks/useVisibility.ts";
-import {useForm} from "../../hooks/useForm.ts";
+import { useTheme } from "../../hooks/useTheme";
+import { useVisibility } from "../../hooks/useVisibility";
+import { useForm } from "../../hooks/useForm";
 
 interface FormData {
     name: string;
@@ -21,21 +21,33 @@ const ContactSection: React.FC = () => {
     const { theme } = useTheme();
     const [ref, visible] = useVisibility(0.2);
 
-    const language = (currentLanguage === 'en' || currentLanguage === 'ru') ? currentLanguage : 'ru';
-    const blogCategories = getCategoriesByLanguage(language);
+    const [services, setServices] = useState<string[]>([]);
+    const [loadingServices, setLoadingServices] = useState(true);
 
-    const services = [...blogCategories];
+    // Загружаем список услуг при монтировании и смене языка
+    useEffect(() => {
+        const loadServices = async () => {
+            try {
+                const data = await fetchPublicServices(currentLanguage as 'en' | 'ru');
+                // Извлекаем заголовки услуг (они уже переведены)
+                const titles = data.map((service: any) => service.title);
+                setServices(titles);
+            } catch (err) {
+                console.error('Failed to load services', err);
+            } finally {
+                setLoadingServices(false);
+            }
+        };
+        loadServices();
+    }, [currentLanguage]);
 
-    // Функция валидации
     const validateForm = (values: FormData): Partial<Record<keyof FormData, string>> => {
         const errors: Partial<Record<keyof FormData, string>> = {};
-
         if (!values.name.trim()) {
             errors.name = t('contact.errors.required');
         } else if (values.name.trim().length < 2) {
             errors.name = t('contact.errors.minLength', { length: 2 });
         }
-
         if (!values.phone.trim()) {
             errors.phone = t('contact.errors.required');
         } else {
@@ -44,33 +56,32 @@ const ContactSection: React.FC = () => {
                 errors.phone = t('contact.errors.phone');
             }
         }
-
         if (values.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
             errors.email = t('contact.errors.email');
         }
-
         if (!values.service) {
             errors.service = t('contact.errors.required');
         }
-
         return errors;
     };
 
-    // Обработчик отправки формы
     const handleSubmit = async (values: FormData) => {
-        createApplication({
-            name: values.name,
-            email: values.email,
-            phone: values.phone,
-            service: values.service,
-            message: values.message
-        }, currentLanguage as 'en' | 'ru');
-
-        console.log("Форма отправлена:", values);
-        alert(t('contact.successMessage'));
+        try {
+            await createApplication({
+                name: values.name,
+                email: values.email,
+                phone: values.phone,
+                service: values.service,
+                message: values.message
+            });
+            console.log("Форма отправлена:", values);
+            alert(t('contact.successMessage'));
+        } catch (err: any) {
+            console.error(err);
+            alert(err.message || t('contact.errorMessage') || 'Ошибка отправки');
+        }
     };
 
-    // Используем хук формы
     const {
         values: formData,
         errors,
@@ -93,26 +104,21 @@ const ContactSection: React.FC = () => {
         onSubmit: handleSubmit
     });
 
-    // Автоматическое заполнение услуги
     useEffect(() => {
         const handleServiceSelection = (event: CustomEvent) => {
             setFieldValue('service', event.detail.service);
         };
-
         const savedService = sessionStorage.getItem('selectedService');
         if (savedService) {
             setFieldValue('service', savedService);
             sessionStorage.removeItem('selectedService');
         }
-
         window.addEventListener('serviceSelected', handleServiceSelection as EventListener);
-
         return () => {
             window.removeEventListener('serviceSelected', handleServiceSelection as EventListener);
         };
     }, [setFieldValue]);
 
-    // Обработчик формы со сбросом после успешной отправки
     const handleFormSubmit = async (e: React.FormEvent) => {
         await submitHandler(e);
         if (Object.keys(errors).length === 0) {
@@ -120,7 +126,6 @@ const ContactSection: React.FC = () => {
         }
     };
 
-    // JSX остается практически без изменений, только замените обработчики:
     return (
         <section
             id="contact"
@@ -132,9 +137,7 @@ const ContactSection: React.FC = () => {
                 {/* Заголовок */}
                 <div
                     className={`overflow-hidden mb-8 transition-transform duration-1000 ${
-                        visible
-                            ? "translate-y-0 opacity-100"
-                            : "translate-y-12 opacity-0"
+                        visible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
                     }`}
                 >
                     <h2 className="text-[2.2rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[7rem] font-syne uppercase font-semibold leading-tight">
@@ -147,7 +150,7 @@ const ContactSection: React.FC = () => {
                         visible ? "opacity-100" : "opacity-0"
                     }`}
                 >
-                    {/* Левая колонка — контакты */}
+                    {/* Левая колонка — контакты (без изменений) */}
                     <div className="space-y-10">
                         <p className="text-lg md:text-xl text-[var(--text-secondary)] max-w-[80%] leading-relaxed mb-12!">
                             {t('contact.description.part1')}{" "}
@@ -169,12 +172,8 @@ const ContactSection: React.FC = () => {
                                 />
                             </div>
                             <div>
-                                <h3 className="font-semibold text-xl mb-1">
-                                    {t('contact.phone')}
-                                </h3>
-                                <p className="text-[var(--text-secondary)] text-lg">
-                                    +7 (495) 123-45-67
-                                </p>
+                                <h3 className="font-semibold text-xl mb-1">{t('contact.phone')}</h3>
+                                <p className="text-[var(--text-secondary)] text-lg">+7 (495) 123-45-67</p>
                             </div>
                         </div>
 
@@ -190,12 +189,8 @@ const ContactSection: React.FC = () => {
                                 />
                             </div>
                             <div>
-                                <h3 className="font-semibold text-xl mb-1">
-                                    {t('contact.email')}
-                                </h3>
-                                <p className="text-[var(--text-secondary)] text-lg">
-                                    info@legaltrust.ru
-                                </p>
+                                <h3 className="font-semibold text-xl mb-1">{t('contact.email')}</h3>
+                                <p className="text-[var(--text-secondary)] text-lg">info@legaltrust.ru</p>
                             </div>
                         </div>
 
@@ -211,15 +206,9 @@ const ContactSection: React.FC = () => {
                                 />
                             </div>
                             <div>
-                                <h3 className="font-semibold text-xl mb-1">
-                                    {t('contact.workHours')}
-                                </h3>
-                                <p className="text-[var(--text-secondary)] text-lg">
-                                    {t('contact.workDays')}
-                                </p>
-                                <p className="text-[var(--text-secondary)] text-lg">
-                                    {t('contact.weekend')}
-                                </p>
+                                <h3 className="font-semibold text-xl mb-1">{t('contact.workHours')}</h3>
+                                <p className="text-[var(--text-secondary)] text-lg">{t('contact.workDays')}</p>
+                                <p className="text-[var(--text-secondary)] text-lg">{t('contact.weekend')}</p>
                             </div>
                         </div>
                     </div>
@@ -235,9 +224,7 @@ const ContactSection: React.FC = () => {
                         <form onSubmit={handleFormSubmit} className="space-y-6" noValidate>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                                 <div>
-                                    <label className="block text-sm mb-2 font-medium">
-                                        {t('contact.form.name')} *
-                                    </label>
+                                    <label className="block text-sm mb-2 font-medium">{t('contact.form.name')} *</label>
                                     <input
                                         type="text"
                                         name="name"
@@ -251,14 +238,10 @@ const ContactSection: React.FC = () => {
                                         placeholder={t('contact.placeholders.name')}
                                         disabled={isSubmitting}
                                     />
-                                    {errors.name && touched.name && (
-                                        <p className="text-red-500 text-xs mt-1">{errors.name}</p>
-                                    )}
+                                    {errors.name && touched.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
                                 </div>
                                 <div>
-                                    <label className="block text-sm mb-2 font-medium">
-                                        {t('contact.form.phone')} *
-                                    </label>
+                                    <label className="block text-sm mb-2 font-medium">{t('contact.form.phone')} *</label>
                                     <input
                                         type="tel"
                                         name="phone"
@@ -272,16 +255,12 @@ const ContactSection: React.FC = () => {
                                         placeholder={t('contact.placeholders.phone')}
                                         disabled={isSubmitting}
                                     />
-                                    {errors.phone && touched.phone && (
-                                        <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
-                                    )}
+                                    {errors.phone && touched.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-sm mb-2 font-medium">
-                                    {t('contact.form.email')}
-                                </label>
+                                <label className="block text-sm mb-2 font-medium">{t('contact.form.email')}</label>
                                 <input
                                     type="email"
                                     name="email"
@@ -294,15 +273,11 @@ const ContactSection: React.FC = () => {
                                     placeholder={t('contact.placeholders.email')}
                                     disabled={isSubmitting}
                                 />
-                                {errors.email && touched.email && (
-                                    <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-                                )}
+                                {errors.email && touched.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                             </div>
 
                             <div>
-                                <label className="block text-sm mb-2 font-medium">
-                                    {t('contact.form.service')} *
-                                </label>
+                                <label className="block text-sm mb-2 font-medium">{t('contact.form.service')} *</label>
                                 <div className="relative">
                                     <select
                                         name="service"
@@ -316,14 +291,11 @@ const ContactSection: React.FC = () => {
                                             backgroundColor: theme === "dark" ? "var(--bg-secondary)" : "transparent",
                                             color: "var(--text-primary)"
                                         }}
-                                        disabled={isSubmitting}
+                                        disabled={isSubmitting || loadingServices}
                                     >
                                         <option value="">{t('contact.placeholders.service')}</option>
                                         {services.map((s, i) => (
-                                            <option key={i} value={s} style={{
-                                                backgroundColor: theme === "dark" ? "var(--bg-secondary)" : "white",
-                                                color: theme === "dark" ? "var(--text-primary)" : "var(--text-primary)"
-                                            }}>
+                                            <option key={i} value={s}>
                                                 {s}
                                             </option>
                                         ))}
@@ -337,15 +309,11 @@ const ContactSection: React.FC = () => {
                                         }}
                                     />
                                 </div>
-                                {errors.service && touched.service && (
-                                    <p className="text-red-500 text-xs mt-1">{errors.service}</p>
-                                )}
+                                {errors.service && touched.service && <p className="text-red-500 text-xs mt-1">{errors.service}</p>}
                             </div>
 
                             <div>
-                                <label className="block text-sm mb-2 font-medium">
-                                    {t('contact.form.message')}
-                                </label>
+                                <label className="block text-sm mb-2 font-medium">{t('contact.form.message')}</label>
                                 <textarea
                                     name="message"
                                     rows={4}
@@ -358,12 +326,9 @@ const ContactSection: React.FC = () => {
                                     placeholder={t('contact.placeholders.message')}
                                     disabled={isSubmitting}
                                 />
-                                {errors.message && touched.message && (
-                                    <p className="text-red-500 text-xs mt-1">{errors.message}</p>
-                                )}
+                                {errors.message && touched.message && <p className="text-red-500 text-xs mt-1">{errors.message}</p>}
                             </div>
 
-                            {/* Кнопка с анимацией как на других секциях */}
                             <button
                                 type="submit"
                                 className="relative inline-flex items-center group py-4 active:scale-95 transition-transform duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -384,16 +349,14 @@ const ContactSection: React.FC = () => {
                                 <Link
                                     to="/privacy"
                                     className="text-[var(--accent)] underline"
-                                >
-                                    {t('contact.privacy.part2')}
-                                </Link>
+                                    dangerouslySetInnerHTML={{ __html: t('contact.privacy.part2') }}
+                                />
                             </p>
                         </form>
                     </div>
                 </div>
             </div>
 
-            {/* Нижняя линия */}
             <DecorativeLine visible={visible} />
         </section>
     );

@@ -1,25 +1,32 @@
 ﻿import React, { useEffect, useState } from "react";
-import { useI18n } from "../../hooks/useI18n.ts";
-import DecorativeLine from "../common/DecorativeLine.tsx";
-import {getStatsForDisplay} from "../../services/statsService.ts";
-import {useVisibility} from "../../hooks/useVisibility.ts";
-
+import { useI18n } from "../../hooks/useI18n";
+import DecorativeLine from "../common/DecorativeLine";
+import { fetchPublicStats, type StatPublic } from "../../services/statsService";
+import { useVisibility } from "../../hooks/useVisibility";
 
 const StatsSection: React.FC = () => {
     const [animatedValues, setAnimatedValues] = useState<number[]>([]);
+    const [stats, setStats] = useState<StatPublic[]>([]);
     const { t, currentLanguage } = useI18n();
-
-    // Получаем статистику на текущем языке
-    const stats = getStatsForDisplay(currentLanguage as 'en' | 'ru');
-
     const [ref, visible] = useVisibility(0.2);
 
     useEffect(() => {
-        if (!visible) return;
+        const loadStats = async () => {
+            try {
+                const data = await fetchPublicStats(currentLanguage as 'en' | 'ru');
+                setStats(data);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        loadStats();
+    }, [currentLanguage]);
+
+    useEffect(() => {
+        if (!visible || stats.length === 0) return;
         const duration = 2000;
         const steps = 60;
         let current = 0;
-
         const interval = setInterval(() => {
             current++;
             setAnimatedValues(
@@ -27,7 +34,9 @@ const StatsSection: React.FC = () => {
             );
             if (current >= steps) clearInterval(interval);
         }, duration / steps);
-    }, [visible]);
+    }, [visible, stats]);
+
+    //if (stats.length === 0) return null;
 
     return (
         <section
@@ -49,14 +58,13 @@ const StatsSection: React.FC = () => {
                     </h2>
                 </div>
 
-                {/* Параметры статистики */}
                 <div
                     className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mt-4 transition-opacity duration-1000 ${
                         visible ? "opacity-100" : "opacity-0"
                     }`}
                 >
                     {stats.map((s, i) => (
-                        <div key={i} className="text-center">
+                        <div key={s.id} className="text-center">
                             <div className="text-[2rem] sm:text-[2.5rem] md:text-[3rem] lg:text-[4rem] font-bold text-[var(--accent)]">
                                 {animatedValues[i] ?? 0}
                                 {s.hasPlus && "+"}
@@ -68,9 +76,7 @@ const StatsSection: React.FC = () => {
                     ))}
                 </div>
             </div>
-
-            {/* дополнительная линия после блоков */}
-            <DecorativeLine visible={visible} delay={1500}/>
+            <DecorativeLine visible={visible} delay={1500} />
         </section>
     );
 };

@@ -1,4 +1,4 @@
-﻿import React, {useEffect} from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import HeroSection from '../components/sections/HeroSection';
 import AboutSection from '../components/sections/AboutSection';
 import StatsSection from '../components/sections/StatsSection';
@@ -8,13 +8,43 @@ import ReviewsSection from '../components/sections/ReviewsSection';
 import BlogSection from '../components/sections/BlogSection';
 import ContactSection from '../components/sections/ContactSection';
 import { useI18n } from '../hooks/useI18n';
+import { getHomePageData, type HomePageData } from '../services/bffService';
 
 const HomePage: React.FC = () => {
-    const { t } = useI18n();
+    const { t, currentLanguage } = useI18n();
+    const [homeData, setHomeData] = useState<HomePageData | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
     useEffect(() => {
+        const loadData = async () => {
+            setLoading(true);
+            setError('');
+            try {
+                const data = await getHomePageData(currentLanguage as 'en' | 'ru');
+                setHomeData(data);
+            } catch (err: any) {
+                console.error(err);
+                setError(err.message || 'Ошибка загрузки данных');
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadData();
         window.scrollTo(0, 0);
-    }, []);
+    }, [currentLanguage]);
+
+    if (loading) {
+        return (
+            <section className="relative bg-[var(--bg-primary)] text-[var(--text-primary)] min-h-screen flex items-center justify-center">
+                <div>{t('common.loading')}</div>
+            </section>
+        );
+    }
+
+    if (error) {
+        return <div className="text-red-500 text-center py-10">{error}</div>;
+    }
 
     return (
         <>
@@ -29,10 +59,10 @@ const HomePage: React.FC = () => {
             />
             <AboutSection />
             <StatsSection />
-            <ServicesSection />
-            <TeamSection />
+            <ServicesSection services={homeData?.services || []} />
+            <TeamSection teamMembers={homeData?.teamMembers || []} />
             <ReviewsSection />
-            <BlogSection />
+            <BlogSection posts={homeData?.blogPosts || []} />
             <ContactSection />
         </>
     );

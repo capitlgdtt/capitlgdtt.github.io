@@ -1,36 +1,65 @@
 ﻿import React, { useEffect, useState } from 'react';
 import { useI18n } from '../../../hooks/useI18n';
-import {Link} from "react-router-dom";
-import {getPosts, deletePost} from "../../../services/blogService.ts";
-import type {BlogPost} from "../../../types";
+import { fetchPosts, deletePost } from '../../../services/blogService';
+import { Link } from 'react-router-dom';
+import type { BlogPost } from '../../../types';
 
 const PostsManager: React.FC = () => {
     const { t, currentLanguage } = useI18n();
     const [posts, setPosts] = useState<BlogPost[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
     useEffect(() => {
-        const loadedPosts = getPosts();
-        setPosts(loadedPosts);
+        loadPosts();
     }, []);
 
-    const handleDeletePost = async (postId: number, postTitle: string) => {
-        const confirmed = window.confirm(
-            `${t('admin.posts.deleteConfirm.message')} "${postTitle}"?`
-        );
-
-        if (confirmed) {
-            const success = deletePost(postId);
-            if (success) {
-                // Обновляем список
-                setPosts(getPosts());
-                alert(t('admin.posts.deleteConfirm.deleted'));
-            }
+    const loadPosts = async () => {
+        setLoading(true);
+        try {
+            const data = await fetchPosts();
+            setPosts(data);
+        } catch (err: any) {
+            setError(err.message || 'Ошибка загрузки');
+        } finally {
+            setLoading(false);
         }
     };
 
     const getCurrentTranslation = (post: BlogPost) => {
         return post.translations[currentLanguage as 'en' | 'ru'] || post.translations.en;
     };
+
+    const handleDeletePost = async (postId: number, postTitle: string) => {
+        const confirmed = window.confirm(
+            `${t('admin.posts.deleteConfirm.message')} "${postTitle}"?`
+        );
+        if (!confirmed) return;
+
+        try {
+            await deletePost(postId);
+            await loadPosts();
+            alert(t('admin.posts.deleteConfirm.deleted'));
+        } catch (err: any) {
+            alert(err.message || 'Ошибка удаления');
+        }
+    };
+
+    if (loading) {
+        return (
+            <section className="relative bg-[var(--bg-primary)] text-[var(--text-primary)] min-h-screen flex items-center justify-center">
+                <div>{t('common.loading')}</div>
+            </section>
+        );
+    }
+
+    if (error) {
+        return (
+            <section className="relative bg-[var(--bg-primary)] text-[var(--text-primary)] min-h-screen flex items-center justify-center">
+                <div className="text-red-500">{error}</div>
+            </section>
+        );
+    }
 
     return (
         <section
@@ -41,7 +70,6 @@ const PostsManager: React.FC = () => {
             }}
         >
             <div className="max-w-[1920px] mx-auto w-full">
-                {/* Заголовок */}
                 <div className="overflow-hidden mb-6">
                     <h2 className="text-[2rem] sm:text-[2.5rem] md:text-[3rem] lg:text-[4rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
                         {t('admin.posts.title')}
@@ -49,11 +77,7 @@ const PostsManager: React.FC = () => {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-x-8 gap-y-4 mb-6">
-                    {/* Кнопка возврата */}
-                    <Link
-                        to="/admin"
-                        className="relative inline-flex items-center group py-4"
-                    >
+                    <Link to="/admin" className="relative inline-flex items-center group py-4">
                         <img
                             src="/arrow_details.svg"
                             alt="arrow"
@@ -73,11 +97,7 @@ const PostsManager: React.FC = () => {
                         </div>
                     </Link>
 
-                    {/* Кнопка создания поста */}
-                    <Link
-                        to="/admin/posts/create"
-                        className="relative inline-flex items-center group py-4"
-                    >
+                    <Link to="/admin/posts/create" className="relative inline-flex items-center group py-4">
                         <div className="relative overflow-hidden">
                             <div className="text-[var(--accent)] uppercase tracking-wide font-medium transition-transform duration-300 group-hover:-translate-y-full">
                                 {t('admin.posts.create')}
@@ -97,7 +117,6 @@ const PostsManager: React.FC = () => {
                     </Link>
                 </div>
 
-                {/* Список постов */}
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                     {posts.map((post) => {
                         const translation = getCurrentTranslation(post);
@@ -137,7 +156,7 @@ const PostsManager: React.FC = () => {
                                     </button>
                                 </div>
                             </div>
-                        )
+                        );
                     })}
                 </div>
             </div>

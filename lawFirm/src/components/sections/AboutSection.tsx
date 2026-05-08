@@ -6,7 +6,6 @@ import {useVisibility} from "../../hooks/useVisibility.ts";
 const AboutSection: React.FC = () => {
     const { t, currentLanguage } = useI18n();
 
-    // Константные данные на двух языках
     const aboutData: Record<string, string[]> = {
         en: [
             "Our company brings together lawyers, consultants and analysts with years of experience in the legal field. We create solutions for clients of any scale — from small businesses to international corporations.",
@@ -18,7 +17,6 @@ const AboutSection: React.FC = () => {
         ]
     };
 
-    // Получаем параграфы на текущем языке
     const paragraphs = aboutData[currentLanguage] || aboutData.en;
 
     const [ref, visible] = useVisibility(0.2);

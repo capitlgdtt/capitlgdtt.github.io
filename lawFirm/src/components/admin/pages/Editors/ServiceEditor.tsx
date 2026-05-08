@@ -1,12 +1,9 @@
 ﻿import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../../hooks/useI18n';
-import LanguageTabs from "../../editor/LanguageTabs.tsx";
-import {
-    getServiceById,
-    createService,
-    updateService
-} from '../../../../services/serviceService.ts';
+import LanguageTabs from '../../editor/LanguageTabs';
+import { fetchServiceById, createService, updateService } from '../../../../services/serviceService';
+import { apiClient } from '../../../../api/apiClient';
 
 const ServiceEditor: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -25,6 +22,24 @@ const ServiceEditor: React.FC = () => {
         currentLanguage: siteLanguage as 'en' | 'ru'
     });
 
+    const [uploading, setUploading] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setUploading(true);
+        try {
+            const { url } = await apiClient.uploadFile(file);
+            setFormData(prev => ({ ...prev, image: url }));
+        } catch (err) {
+            console.error('Upload failed', err);
+            alert('Ошибка загрузки изображения');
+        } finally {
+            setUploading(false);
+        }
+    };
+
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
@@ -32,21 +47,27 @@ const ServiceEditor: React.FC = () => {
     // Загрузка данных при редактировании
     useEffect(() => {
         if (isEditing && serviceId) {
-            const service = getServiceById(serviceId);
-            if (service) {
-                setFormData({
-                    translations: service.translations,
-                    image: service.image,
-                    currentLanguage: siteLanguage as 'en' | 'ru'
-                });
-            }
+            const loadService = async () => {
+                setLoading(true);
+                try {
+                    const service = await fetchServiceById(serviceId);
+                    setFormData({
+                        translations: service.translations,
+                        image: service.image,
+                        currentLanguage: siteLanguage as 'en' | 'ru'
+                    });
+                } catch (err) {
+                    console.error(err);
+                    alert('Ошибка загрузки данных');
+                } finally {
+                    setLoading(false);
+                }
+            };
+            loadService();
         }
     }, [isEditing, serviceId, siteLanguage]);
 
-    const handleTranslationChange = (
-        field: 'title' | 'description',
-        value: string
-    ) => {
+    const handleTranslationChange = (field: 'title' | 'description', value: string) => {
         setFormData(prev => ({
             ...prev,
             translations: {
@@ -63,7 +84,6 @@ const ServiceEditor: React.FC = () => {
         setFormData(prev => {
             const newDetails = [...prev.translations[prev.currentLanguage].details];
             newDetails[index] = value;
-
             return {
                 ...prev,
                 translations: {
@@ -95,7 +115,6 @@ const ServiceEditor: React.FC = () => {
         if (currentDetails.length > 1) {
             setFormData(prev => {
                 const newDetails = currentDetails.filter((_, i) => i !== index);
-
                 return {
                     ...prev,
                     translations: {
@@ -114,19 +133,23 @@ const ServiceEditor: React.FC = () => {
         setFormData(prev => ({ ...prev, currentLanguage: language }));
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         const serviceData = {
             translations: formData.translations,
             image: formData.image || '/services/default.jpg'
         };
 
-        if (isEditing && serviceId) {
-            updateService(serviceId, serviceData);
-        } else {
-            createService(serviceData);
+        try {
+            if (isEditing && serviceId) {
+                await updateService(serviceId, serviceData);
+            } else {
+                await createService(serviceData);
+            }
+            navigate('/admin/services');
+        } catch (err) {
+            console.error('Save failed', err);
+            alert('Ошибка сохранения');
         }
-
-        navigate('/admin/services');
     };
 
     const handleCancel = () => {
@@ -134,6 +157,10 @@ const ServiceEditor: React.FC = () => {
     };
 
     const currentTranslation = formData.translations[formData.currentLanguage];
+
+    if (loading) {
+        return <div className="text-center py-10">Загрузка...</div>;
+    }
 
     return (
         <section
@@ -144,7 +171,6 @@ const ServiceEditor: React.FC = () => {
             }}
         >
             <div className="max-w-[1920px] mx-auto w-full">
-                {/* Заголовок */}
                 <div className="overflow-hidden mb-6">
                     <h2 className="text-[2rem] sm:text-[2.5rem] md:text-[3rem] lg:text-[4rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
                         {isEditing ? t('admin.services.editService') : t('admin.services.createService')}
@@ -152,11 +178,7 @@ const ServiceEditor: React.FC = () => {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-x-8 gap-y-4 mb-6">
-                    {/* Кнопка возврата */}
-                    <button
-                        onClick={handleCancel}
-                        className="relative inline-flex items-center group py-4"
-                    >
+                    <button onClick={handleCancel} className="relative inline-flex items-center group py-4">
                         <img
                             src="/arrow_details.svg"
                             alt="arrow"
@@ -177,19 +199,14 @@ const ServiceEditor: React.FC = () => {
                     </button>
                 </div>
 
-                {/* Языковые табы */}
                 <LanguageTabs
                     currentLanguage={formData.currentLanguage}
                     onLanguageChange={handleLanguageChange}
                 />
 
-                {/* Форма */}
                 <div className="space-y-6 mb-8">
-                    {/* Название услуги */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">
-                            {t('admin.services.form.title')} *
-                        </label>
+                        <label className="block text-sm font-medium mb-2">{t('admin.services.form.title')} *</label>
                         <input
                             type="text"
                             value={currentTranslation.title}
@@ -199,11 +216,8 @@ const ServiceEditor: React.FC = () => {
                         />
                     </div>
 
-                    {/* Описание услуги */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">
-                            {t('admin.services.form.description')} *
-                        </label>
+                        <label className="block text-sm font-medium mb-2">{t('admin.services.form.description')} *</label>
                         <textarea
                             value={currentTranslation.description}
                             onChange={(e) => handleTranslationChange('description', e.target.value)}
@@ -213,12 +227,9 @@ const ServiceEditor: React.FC = () => {
                         />
                     </div>
 
-                    {/* Детали услуги (что мы предлагаем) */}
                     <div>
                         <div className="flex justify-between items-center mb-2">
-                            <label className="block text-sm font-medium">
-                                {t('admin.services.form.details')} *
-                            </label>
+                            <label className="block text-sm font-medium">{t('admin.services.form.details')} *</label>
                             <button
                                 type="button"
                                 onClick={addDetail}
@@ -252,35 +263,31 @@ const ServiceEditor: React.FC = () => {
                                 </div>
                             ))}
                         </div>
-                        <p className="text-xs text-[var(--text-secondary)] mt-2">
-                            {t('admin.services.form.detailsHint')}
-                        </p>
+                        <p className="text-xs text-[var(--text-secondary)] mt-2">{t('admin.services.form.detailsHint')}</p>
                     </div>
 
-                    {/* Изображение услуги */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">
-                            {t('admin.services.form.image')}
-                        </label>
+                        <label className="block text-sm font-medium mb-2">{t('admin.services.form.image')}</label>
                         <input
-                            type="text"
-                            value={formData.image}
-                            onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
-                            className="w-full bg-transparent border border-[var(--text-secondary)] px-4 py-3 focus:border-[var(--accent)] outline-none transition-colors"
-                            placeholder="/services/service1.jpg"
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            onChange={handleImageUpload}
+                            disabled={uploading}
+                            className="w-full bg-transparent border border-[var(--text-secondary)] px-4 py-3 focus:border-[var(--accent)] outline-none transition-colors file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-[var(--accent)] file:text-[var(--bg-primary)] hover:file:opacity-90"
                         />
-                        <p className="text-xs text-[var(--text-secondary)] mt-1">
-                            {t('admin.services.form.imageHint')}
-                        </p>
+                        {formData.image && (
+                            <div className="mt-2">
+                                <img src={formData.image} alt="Preview" className="max-h-32 object-cover rounded" />
+                                <p className="text-xs text-[var(--text-secondary)] mt-1 break-all">{formData.image}</p>
+                            </div>
+                        )}
+                        {uploading && <p className="text-xs text-[var(--text-secondary)] mt-1">Загрузка...</p>}
+                        <p className="text-xs text-[var(--text-secondary)] mt-1">{t('admin.services.form.imageHint')}</p>
                     </div>
                 </div>
 
-                {/* Кнопки действий */}
                 <div className="flex gap-4">
-                    <button
-                        onClick={handleSave}
-                        className="relative inline-flex items-center group py-4"
-                    >
+                    <button onClick={handleSave} className="relative inline-flex items-center group py-4">
                         <div className="relative overflow-hidden">
                             <div className="text-[var(--accent)] uppercase tracking-wide font-medium transition-transform duration-300 group-hover:-translate-y-full">
                                 {isEditing ? t('admin.services.update') : t('admin.services.save')}

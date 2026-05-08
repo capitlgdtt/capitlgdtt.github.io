@@ -1,35 +1,65 @@
 ﻿import React, { useEffect, useState } from 'react';
 import { useI18n } from '../../../hooks/useI18n';
-import { getServices, deleteService } from "../../../services/serviceService";
-import {Link} from "react-router-dom";
-import type {Service} from "../../../types";
+import { fetchServices, deleteService } from '../../../services/serviceService';
+import { Link } from 'react-router-dom';
+import type { Service } from '../../../types';
 
 const ServicesManager: React.FC = () => {
     const { t, currentLanguage } = useI18n();
     const [servicesList, setServicesList] = useState<Service[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
     useEffect(() => {
-        const loadedServices = getServices();
-        setServicesList(loadedServices);
+        loadServices();
     }, []);
+
+    const loadServices = async () => {
+        setLoading(true);
+        try {
+            const data = await fetchServices();
+            setServicesList(data);
+        } catch (err: any) {
+            setError(err.message || 'Ошибка загрузки');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const getCurrentTranslation = (service: Service) => {
         return service.translations[currentLanguage as 'en' | 'ru'] || service.translations.en;
     };
 
-    const handleDeleteService = (serviceId: number, serviceTitle: string) => {
+    const handleDeleteService = async (serviceId: number, serviceTitle: string) => {
         const confirmed = window.confirm(
             `${t('admin.services.deleteConfirm.message')} "${serviceTitle}"?`
         );
+        if (!confirmed) return;
 
-        if (confirmed) {
-            const success = deleteService(serviceId);
-            if (success) {
-                setServicesList(getServices());
-                alert(t('admin.services.deleteConfirm.deleted'));
-            }
+        try {
+            await deleteService(serviceId);
+            await loadServices(); // перезагружаем список
+            alert(t('admin.services.deleteConfirm.deleted'));
+        } catch (err: any) {
+            alert(err.message || 'Ошибка удаления');
         }
     };
+
+    if (loading) {
+        return (
+            <section className="relative bg-[var(--bg-primary)] text-[var(--text-primary)] min-h-screen flex items-center justify-center">
+                <div>{t('common.loading')}</div>
+            </section>
+        );
+    }
+
+    if (error) {
+        return (
+            <section className="relative bg-[var(--bg-primary)] text-[var(--text-primary)] min-h-screen flex items-center justify-center">
+                <div className="text-red-500">{error}</div>
+            </section>
+        );
+    }
 
     return (
         <section
@@ -40,7 +70,6 @@ const ServicesManager: React.FC = () => {
             }}
         >
             <div className="max-w-[1920px] mx-auto w-full">
-                {/* Заголовок */}
                 <div className="overflow-hidden mb-6">
                     <h2 className="text-[2rem] sm:text-[2.5rem] md:text-[3rem] lg:text-[4rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
                         {t('admin.services.title')}
@@ -48,11 +77,7 @@ const ServicesManager: React.FC = () => {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-x-8 gap-y-4 mb-6">
-                    {/* Кнопка возврата */}
-                    <Link
-                        to="/admin"
-                        className="relative inline-flex items-center group py-4"
-                    >
+                    <Link to="/admin" className="relative inline-flex items-center group py-4">
                         <img
                             src="/arrow_details.svg"
                             alt="arrow"
@@ -72,11 +97,7 @@ const ServicesManager: React.FC = () => {
                         </div>
                     </Link>
 
-                    {/* Кнопка добавления */}
-                    <Link
-                        to="/admin/services/create"
-                        className="relative inline-flex items-center group py-4"
-                    >
+                    <Link to="/admin/services/create" className="relative inline-flex items-center group py-4">
                         <div className="relative overflow-hidden">
                             <div className="text-[var(--accent)] uppercase tracking-wide font-medium transition-transform duration-300 group-hover:-translate-y-full">
                                 {t('admin.services.add')}
@@ -96,7 +117,6 @@ const ServicesManager: React.FC = () => {
                     </Link>
                 </div>
 
-                {/* Сетка услуг */}
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                     {servicesList.map((service) => {
                         const translation = getCurrentTranslation(service);
@@ -144,7 +164,7 @@ const ServicesManager: React.FC = () => {
                                     </button>
                                 </div>
                             </div>
-                        )
+                        );
                     })}
                 </div>
             </div>

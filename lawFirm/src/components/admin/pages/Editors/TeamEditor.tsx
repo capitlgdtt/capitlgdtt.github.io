@@ -1,9 +1,16 @@
 ﻿import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {useI18n} from "../../../../hooks/useI18n.ts";
-import {getCategoriesByLanguage, translateCategory} from "../../../../services/blogService.ts";
-import {createTeamMember, getTeamMemberById, updateTeamMember} from "../../../../services/teamService.ts";
-import LanguageTabs from "../../editor/LanguageTabs.tsx";
+import { useI18n } from '../../../../hooks/useI18n';
+import { fetchTeamMemberById, createTeamMember, updateTeamMember } from '../../../../services/teamService';
+import { fetchServices } from '../../../../services/serviceService';
+import { apiClient } from '../../../../api/apiClient';
+import LanguageTabs from '../../editor/LanguageTabs';
+
+interface ServiceItem {
+    id: number;
+    key: string;      // английское название (title_en)
+    title: string;    // переведённое название
+}
 
 const TeamEditor: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -12,9 +19,6 @@ const TeamEditor: React.FC = () => {
 
     const isEditing = !!id;
     const memberId = id ? parseInt(id) : undefined;
-
-    // Получаем категории для специализации
-    const englishCategories = getCategoriesByLanguage('en');
 
     const [formData, setFormData] = useState({
         translations: {
@@ -25,31 +29,72 @@ const TeamEditor: React.FC = () => {
         email: '',
         phone: '',
         experience: '',
-        specialization: [] as string[],
+        specialization: [] as string[], // массив английских ключей услуг
         currentLanguage: siteLanguage as 'en' | 'ru'
     });
 
-    useEffect(() => {
-        window.scrollTo(0, 0);
-    }, []);
+    const [services, setServices] = useState<ServiceItem[]>([]);
+    const [loadingServices, setLoadingServices] = useState(true);
+    const [uploading, setUploading] = useState(false);
 
-    // Загрузка данных при редактировании
+    // Загрузка списка услуг для специализаций
+    useEffect(() => {
+        const loadServices = async () => {
+            try {
+                const data = await fetchServices();
+                const list = data.map(s => ({
+                    id: s.id,
+                    key: s.translations.en.title,
+                    title: s.translations[siteLanguage as 'en' | 'ru']?.title || s.translations.en.title,
+                }));
+                setServices(list);
+            } catch (err) {
+                console.error('Failed to load services', err);
+            } finally {
+                setLoadingServices(false);
+            }
+        };
+        loadServices();
+    }, [siteLanguage]);
+
+    // Загрузка данных сотрудника при редактировании
     useEffect(() => {
         if (isEditing && memberId) {
-            const member = getTeamMemberById(memberId);
-            if (member) {
-                setFormData({
-                    translations: member.translations,
-                    image: member.image,
-                    email: member.email,
-                    phone: member.phone,
-                    experience: member.experience,
-                    specialization: member.specialization,
-                    currentLanguage: siteLanguage as 'en' | 'ru'
-                });
-            }
+            const loadMember = async () => {
+                try {
+                    const member = await fetchTeamMemberById(memberId);
+                    setFormData({
+                        translations: member.translations,
+                        image: member.image,
+                        email: member.email,
+                        phone: member.phone,
+                        experience: member.experience,
+                        specialization: member.specialization,
+                        currentLanguage: siteLanguage as 'en' | 'ru'
+                    });
+                } catch (err) {
+                    console.error(err);
+                    alert('Ошибка загрузки данных');
+                }
+            };
+            loadMember();
         }
     }, [isEditing, memberId, siteLanguage]);
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setUploading(true);
+        try {
+            const { url } = await apiClient.uploadFile(file);
+            setFormData(prev => ({ ...prev, image: url }));
+        } catch (err) {
+            console.error('Upload failed', err);
+            alert('Ошибка загрузки изображения');
+        } finally {
+            setUploading(false);
+        }
+    };
 
     const handleTranslationChange = (field: 'name' | 'role' | 'description', value: string) => {
         setFormData(prev => ({
@@ -68,21 +113,20 @@ const TeamEditor: React.FC = () => {
         setFormData(prev => ({ ...prev, currentLanguage: language }));
     };
 
-    const handleSpecializationChange = (categoryKey: string) => {
+    const handleSpecializationChange = (serviceKey: string) => {
         setFormData(prev => {
-            const currentSpecs = prev.specialization;
-            const isSelected = currentSpecs.includes(categoryKey);
-
+            const current = prev.specialization;
+            const isSelected = current.includes(serviceKey);
             return {
                 ...prev,
                 specialization: isSelected
-                    ? currentSpecs.filter(cat => cat !== categoryKey)
-                    : [...currentSpecs, categoryKey]
+                    ? current.filter(k => k !== serviceKey)
+                    : [...current, serviceKey]
             };
         });
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         const memberData = {
             translations: formData.translations,
             image: formData.image || '/team/default.jpg',
@@ -92,13 +136,17 @@ const TeamEditor: React.FC = () => {
             specialization: formData.specialization
         };
 
-        if (isEditing && memberId) {
-            updateTeamMember(memberId, memberData);
-        } else {
-            createTeamMember(memberData);
+        try {
+            if (isEditing && memberId) {
+                await updateTeamMember(memberId, memberData);
+            } else {
+                await createTeamMember(memberData);
+            }
+            navigate('/admin/team');
+        } catch (err) {
+            console.error('Save failed', err);
+            alert('Ошибка сохранения');
         }
-
-        navigate('/admin/team');
     };
 
     const handleCancel = () => {
@@ -116,7 +164,6 @@ const TeamEditor: React.FC = () => {
             }}
         >
             <div className="max-w-[1920px] mx-auto w-full">
-                {/* Заголовок */}
                 <div className="overflow-hidden mb-6">
                     <h2 className="text-[2rem] sm:text-[2.5rem] md:text-[3rem] lg:text-[4rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
                         {isEditing ? t('admin.team.editMember') : t('admin.team.createMember')}
@@ -124,11 +171,7 @@ const TeamEditor: React.FC = () => {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-x-8 gap-y-4 mb-6">
-                    {/* Кнопка возврата */}
-                    <button
-                        onClick={handleCancel}
-                        className="relative inline-flex items-center group py-4"
-                    >
+                    <button onClick={handleCancel} className="relative inline-flex items-center group py-4">
                         <img
                             src="/arrow_details.svg"
                             alt="arrow"
@@ -149,19 +192,14 @@ const TeamEditor: React.FC = () => {
                     </button>
                 </div>
 
-                {/* Языковые табы */}
                 <LanguageTabs
                     currentLanguage={formData.currentLanguage}
                     onLanguageChange={handleLanguageChange}
                 />
 
-                {/* Форма */}
                 <div className="space-y-6 mb-8">
-                    {/* Имя */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">
-                            {t('admin.team.form.name')} *
-                        </label>
+                        <label className="block text-sm font-medium mb-2">{t('admin.team.form.name')} *</label>
                         <input
                             type="text"
                             value={currentTranslation.name}
@@ -171,11 +209,8 @@ const TeamEditor: React.FC = () => {
                         />
                     </div>
 
-                    {/* Должность */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">
-                            {t('admin.team.form.role')} *
-                        </label>
+                        <label className="block text-sm font-medium mb-2">{t('admin.team.form.role')} *</label>
                         <input
                             type="text"
                             value={currentTranslation.role}
@@ -185,11 +220,8 @@ const TeamEditor: React.FC = () => {
                         />
                     </div>
 
-                    {/* Email */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">
-                            {t('admin.team.form.email')} *
-                        </label>
+                        <label className="block text-sm font-medium mb-2">{t('admin.team.form.email')} *</label>
                         <input
                             type="email"
                             value={formData.email}
@@ -199,11 +231,8 @@ const TeamEditor: React.FC = () => {
                         />
                     </div>
 
-                    {/* Телефон */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">
-                            {t('admin.team.form.phone')} *
-                        </label>
+                        <label className="block text-sm font-medium mb-2">{t('admin.team.form.phone')} *</label>
                         <input
                             type="tel"
                             value={formData.phone}
@@ -213,11 +242,8 @@ const TeamEditor: React.FC = () => {
                         />
                     </div>
 
-                    {/* Опыт */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">
-                            {t('admin.team.form.experience')} *
-                        </label>
+                        <label className="block text-sm font-medium mb-2">{t('admin.team.form.experience')} *</label>
                         <input
                             type="text"
                             value={formData.experience}
@@ -227,25 +253,26 @@ const TeamEditor: React.FC = () => {
                         />
                     </div>
 
-                    {/* Изображение */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">
-                            {t('admin.team.form.image')}
-                        </label>
+                        <label className="block text-sm font-medium mb-2">{t('admin.team.form.image')}</label>
                         <input
-                            type="text"
-                            value={formData.image}
-                            onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
-                            className="w-full bg-transparent border border-[var(--text-secondary)] px-4 py-3 focus:border-[var(--accent)] outline-none transition-colors"
-                            placeholder="/team/photo.jpg"
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            onChange={handleImageUpload}
+                            disabled={uploading}
+                            className="w-full bg-transparent border border-[var(--text-secondary)] px-4 py-3 focus:border-[var(--accent)] outline-none transition-colors file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-[var(--accent)] file:text-[var(--bg-primary)] hover:file:opacity-90"
                         />
+                        {formData.image && (
+                            <div className="mt-2">
+                                <img src={formData.image} alt="Preview" className="max-h-32 object-cover rounded" />
+                                <p className="text-xs text-[var(--text-secondary)] mt-1 break-all">{formData.image}</p>
+                            </div>
+                        )}
+                        {uploading && <p className="text-xs text-[var(--text-secondary)] mt-1">Загрузка...</p>}
                     </div>
 
-                    {/* Описание */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">
-                            {t('admin.team.form.description')} *
-                        </label>
+                        <label className="block text-sm font-medium mb-2">{t('admin.team.form.description')} *</label>
                         <textarea
                             value={currentTranslation.description}
                             onChange={(e) => handleTranslationChange('description', e.target.value)}
@@ -255,45 +282,36 @@ const TeamEditor: React.FC = () => {
                         />
                     </div>
 
-                    {/* Специализация (мультивыбор) */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">
-                            {t('admin.team.form.specialization')}
-                        </label>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                            {englishCategories.map((englishCategory) => {
-                                const translatedCategory = translateCategory(englishCategory, formData.currentLanguage);
-                                return (
-                                    <div key={englishCategory} className="flex items-center">
+                        <label className="block text-sm font-medium mb-2">{t('admin.team.form.specialization')}</label>
+                        {loadingServices ? (
+                            <p className="text-[var(--text-secondary)]">Загрузка...</p>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                {services.map(service => (
+                                    <div key={service.key} className="flex items-center">
                                         <input
                                             type="checkbox"
-                                            id={`spec-${englishCategory}`}
-                                            checked={formData.specialization.includes(englishCategory)}
-                                            onChange={() => handleSpecializationChange(englishCategory)}
+                                            id={`spec-${service.key}`}
+                                            checked={formData.specialization.includes(service.key)}
+                                            onChange={() => handleSpecializationChange(service.key)}
                                             className="mr-2"
                                         />
-                                        <label
-                                            htmlFor={`spec-${englishCategory}`}
-                                            className="cursor-pointer hover:text-[var(--accent)] transition-colors"
-                                        >
-                                            {translatedCategory}
+                                        <label htmlFor={`spec-${service.key}`} className="cursor-pointer hover:text-[var(--accent)] transition-colors">
+                                            {service.title}
                                         </label>
                                     </div>
-                                )
-                            })}
-                        </div>
+                                ))}
+                            </div>
+                        )}
                         <p className="text-xs text-[var(--text-secondary)] mt-2">
                             {t('admin.team.form.specializationHint')}
                         </p>
                     </div>
                 </div>
 
-                {/* Кнопки действий */}
                 <div className="flex gap-4">
-                    <button
-                        onClick={handleSave}
-                        className="relative inline-flex items-center group py-4"
-                    >
+                    <button onClick={handleSave} className="relative inline-flex items-center group py-4">
                         <div className="relative overflow-hidden">
                             <div className="text-[var(--accent)] uppercase tracking-wide font-medium transition-transform duration-300 group-hover:-translate-y-full">
                                 {isEditing ? t('admin.team.update') : t('admin.team.save')}

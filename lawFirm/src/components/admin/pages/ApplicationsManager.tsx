@@ -1,38 +1,42 @@
 ﻿import React, { useEffect, useState } from 'react';
 import { useI18n } from '../../../hooks/useI18n';
 import {
-    getApplications,
+    fetchApplications,
     deleteApplication,
     updateApplicationStatus,
-    getApplicationsStats
-} from '../../../services/applicationService.ts';
-import {getCategoriesByLanguage, translateCategory} from '../../../services/blogService.ts';
-import {Link} from "react-router-dom";
-import {useTheme} from "../../../hooks/useTheme.ts";
+    fetchApplicationsStats, type Application
+} from '../../../services/applicationService';
+import { fetchServices } from '../../../services/serviceService';
+import { Link } from "react-router-dom";
+import { useTheme } from "../../../hooks/useTheme";
 import { useFilter } from '../../../hooks/useFilter';
+
+interface Service {
+    id: number;
+    translations: {
+        en: { title: string };
+        ru: { title: string };
+    };
+    // ... другие поля не нужны для фильтра
+}
 
 const ApplicationsManager: React.FC = () => {
     const { t, currentLanguage } = useI18n();
-    const [applications, setApplications] = useState(getApplications());
-    const [stats, setStats] = useState(getApplicationsStats());
+    const [applications, setApplications] = useState<Application[]>([]);
+    const [stats, setStats] = useState({ total: 0, new: 0, inProgress: 0, completed: 0 });
+    const [categories, setCategories] = useState<{ value: string; label: string }[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
-    // Получаем категории услуг для фильтра
-    const categories = ['all', ...getCategoriesByLanguage((currentLanguage || 'ru') as 'en' | 'ru')];
-
-    // Отслеживание темы для стилей выпадающих списков
     const { theme } = useTheme();
 
-    // Определяем фильтры для useFilter
-    const statusFilter = (app: any, status: string) => app.status === status;
-    const serviceFilter = (app: any, selectedCategory: string) => {
+    // Фильтры
+    const statusFilter = (app: Application, status: string) => app.status === status;
+    const serviceFilter = (app: Application, selectedCategory: string) => {
         if (selectedCategory === 'all') return true;
-
-        const translatedAppService = translateCategory(app.service, currentLanguage as 'en' | 'ru');
-        return translatedAppService === selectedCategory;
+        return app.service === selectedCategory;
     };
-
-    // Функция сортировки по дате (новые сверху)
-    const sortByDate = (a: any, b: any) =>
+    const sortByDate = (a: Application, b: Application) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
 
     const {
@@ -42,30 +46,51 @@ const ApplicationsManager: React.FC = () => {
         resetFilters
     } = useFilter(
         applications,
-        {
-            status: statusFilter,
-            service: serviceFilter
-        },
-        {
-            status: 'all',
-            service: 'all'
-        },
+        { status: statusFilter, service: serviceFilter },
+        { status: 'all', service: 'all' },
         sortByDate
     );
 
-    // Извлекаем значения фильтров
     const selectedStatus = filterValues.status;
     const selectedService = filterValues.service;
 
-    // Обновление статистики
-    useEffect(() => {
-        setStats(getApplicationsStats());
-    }, [applications]);
+    // Загрузка данных
+    const loadData = async () => {
+        setLoading(true);
+        setError('');
+        try {
+            // Загружаем всё параллельно
+            const [appsData, statsData, servicesData] = await Promise.all([
+                fetchApplications(),
+                fetchApplicationsStats(),
+                fetchServices()
+            ]);
+            setApplications(appsData.items);
+            setStats(statsData);
 
-    const handleStatusChange = async (id: number, newStatus: 'new' | 'in-progress' | 'completed') => {
-        const updated = updateApplicationStatus(id, newStatus);
-        if (updated) {
-            setApplications(getApplications());
+            // Формируем список категорий для фильтра на основе загруженных услуг
+            const categoriesList = servicesData.map((service: Service) => ({
+                value: service.translations.en.title,   // английское название – ключ для фильтра
+                label: service.translations[currentLanguage as 'en' | 'ru']?.title || service.translations.en.title
+            }));
+            setCategories([{ value: 'all', label: t('admin.applications.filters.allServices') }, ...categoriesList]);
+        } catch (err: any) {
+            setError(err.message || 'Ошибка загрузки');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadData();
+    }, [currentLanguage]); // перезагружаем при смене языка (чтобы обновить переводы категорий)
+
+    const handleStatusChange = async (id: number, newStatus: Application['status']) => {
+        try {
+            await updateApplicationStatus(id, newStatus);
+            await loadData(); // обновляем список
+        } catch (err: any) {
+            alert(err.message);
         }
     };
 
@@ -73,12 +98,13 @@ const ApplicationsManager: React.FC = () => {
         const confirmed = window.confirm(
             `${t('admin.applications.deleteConfirm.message')} "${applicantName}"?`
         );
+        if (!confirmed) return;
 
-        if (confirmed) {
-            const success = deleteApplication(id);
-            if (success) {
-                setApplications(getApplications());
-            }
+        try {
+            await deleteApplication(id);
+            await loadData();
+        } catch (err: any) {
+            alert(err.message);
         }
     };
 
@@ -100,23 +126,42 @@ const ApplicationsManager: React.FC = () => {
         }
     };
 
-    const handleResetFilters = () => {
-        resetFilters(); // Используем метод из useFilter
-    };
+    const handleResetFilters = () => resetFilters();
 
-    // Локализация названий полей
     const getFieldLabel = (field: string) => {
         const labels: Record<string, string> = {
-            'name': t('contact.form.name'),
-            'email': t('contact.form.email'),
-            'phone': t('contact.form.phone'),
-            'service': t('contact.form.service'),
-            'message': t('contact.form.message'),
-            'createdAt': t('admin.applications.date'),
-            'status': t('admin.applications.statusLabel')
+            name: t('contact.form.name'),
+            email: t('contact.form.email'),
+            phone: t('contact.form.phone'),
+            service: t('contact.form.service'),
+            message: t('contact.form.message'),
+            createdAt: t('admin.applications.date'),
+            status: t('admin.applications.statusLabel')
         };
         return labels[field] || field;
     };
+
+    // Функция перевода категории (используем уже готовую метку из списка)
+    const translateCategory = (key: string) => {
+        const category = categories.find(c => c.value === key);
+        return category ? category.label : key;
+    };
+
+    if (loading) {
+        return (
+            <section className="relative bg-[var(--bg-primary)] text-[var(--text-primary)] min-h-screen flex items-center justify-center">
+                <div>{t('common.loading')}</div>
+            </section>
+        );
+    }
+
+    if (error) {
+        return (
+            <section className="relative bg-[var(--bg-primary)] text-[var(--text-primary)] min-h-screen flex items-center justify-center">
+                <div className="text-red-500">{error}</div>
+            </section>
+        );
+    }
 
     return (
         <section
@@ -127,7 +172,6 @@ const ApplicationsManager: React.FC = () => {
             }}
         >
             <div className="max-w-[1920px] mx-auto w-full">
-                {/* Заголовок */}
                 <div className="overflow-hidden mb-6">
                     <h2 className="text-[2rem] sm:text-[2.5rem] md:text-[3rem] lg:text-[4rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
                         {t('admin.applications.title')}
@@ -135,11 +179,7 @@ const ApplicationsManager: React.FC = () => {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-x-8 gap-y-4 mb-6">
-                    {/* Кнопка возврата */}
-                    <Link
-                        to="/admin"
-                        className="relative inline-flex items-center group py-4"
-                    >
+                    <Link to="/admin" className="relative inline-flex items-center group py-4">
                         <img
                             src="/arrow_details.svg"
                             alt="arrow"
@@ -187,7 +227,7 @@ const ApplicationsManager: React.FC = () => {
                         <div className="relative">
                             <select
                                 value={selectedStatus}
-                                onChange={(e) => updateFilter('status', e.target.value)} // Используем updateFilter
+                                onChange={(e) => updateFilter('status', e.target.value)}
                                 className={`w-full bg-transparent border px-4 py-2 focus:border-[var(--accent)] outline-none transition appearance-none pr-12 ${
                                     selectedStatus !== 'all' ? 'border-[var(--accent)]' : 'border-[var(--text-secondary)]'
                                 }`}
@@ -237,7 +277,7 @@ const ApplicationsManager: React.FC = () => {
                         <div className="relative">
                             <select
                                 value={selectedService}
-                                onChange={(e) => updateFilter('service', e.target.value)} // Используем updateFilter
+                                onChange={(e) => updateFilter('service', e.target.value)}
                                 className={`w-full bg-transparent border px-4 py-2 focus:border-[var(--accent)] outline-none transition appearance-none pr-12 ${
                                     selectedService !== 'all' ? 'border-[var(--accent)]' : 'border-[var(--text-secondary)]'
                                 }`}
@@ -246,16 +286,16 @@ const ApplicationsManager: React.FC = () => {
                                     color: "var(--text-primary)"
                                 }}
                             >
-                                {categories.map((category, index) => (
+                                {categories.map((cat) => (
                                     <option
-                                        key={index}
-                                        value={category}
+                                        key={cat.value}
+                                        value={cat.value}
                                         style={{
                                             backgroundColor: theme === "dark" ? "var(--bg-secondary)" : "white",
                                             color: theme === "dark" ? "var(--text-primary)" : "var(--text-primary)"
                                         }}
                                     >
-                                        {category === 'all' ? t('admin.applications.filters.allServices') : category}
+                                        {cat.label}
                                     </option>
                                 ))}
                             </select>
@@ -308,7 +348,7 @@ const ApplicationsManager: React.FC = () => {
                                                 <strong>{getFieldLabel('phone')}:</strong> {application.phone}
                                             </div>
                                             <div>
-                                                <strong>{getFieldLabel('service')}:</strong> {translateCategory(application.service, currentLanguage as 'en' | 'ru')}
+                                                <strong>{getFieldLabel('service')}:</strong> {translateCategory(application.service)}
                                             </div>
                                             <div>
                                                 <strong>{getFieldLabel('createdAt')}:</strong> {application.createdAt}
@@ -323,16 +363,13 @@ const ApplicationsManager: React.FC = () => {
                                 </div>
 
                                 <div className="flex flex-wrap gap-4 pt-4 border-t border-[var(--bg-secondary)]">
-                                    {/* Изменение статуса */}
                                     <div className="flex items-center gap-2">
                                         <span className="text-sm text-[var(--text-secondary)]">{getFieldLabel('status')}:</span>
                                         <div className="relative">
                                             <select
                                                 value={application.status}
                                                 onChange={(e) => handleStatusChange(application.id, e.target.value as any)}
-                                                className={`bg-transparent border px-3 py-1 text-sm focus:border-[var(--accent)] outline-none transition appearance-none pr-8 ${
-                                                    'border-[var(--text-secondary)]'
-                                                }`}
+                                                className={`bg-transparent border px-3 py-1 text-sm focus:border-[var(--accent)] outline-none transition appearance-none pr-8 border-[var(--text-secondary)]`}
                                                 style={{
                                                     backgroundColor: theme === "dark" ? "var(--bg-secondary)" : "transparent",
                                                     color: "var(--text-primary)"
@@ -368,7 +405,6 @@ const ApplicationsManager: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    {/* Кнопки действий */}
                                     <div className="flex gap-4 ml-auto">
                                         <button
                                             onClick={() => handleDeleteApplication(application.id, application.name)}

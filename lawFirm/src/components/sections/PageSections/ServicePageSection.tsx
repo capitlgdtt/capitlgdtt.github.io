@@ -1,17 +1,40 @@
-﻿import React, { useEffect } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import {useI18n} from "../../../hooks/useI18n.ts";
-import DecorativeLine from "../../common/DecorativeLine.tsx";
-import {getServicesForDisplay} from "../../../services/serviceService.ts";
-import {useTheme} from "../../../hooks/useTheme.ts";
-import {useVisibility} from "../../../hooks/useVisibility.ts";
+import { useI18n } from "../../../hooks/useI18n";
+import DecorativeLine from "../../common/DecorativeLine";
+import { fetchPublicServices } from "../../../services/serviceService";
+import { useTheme } from "../../../hooks/useTheme";
+import { useVisibility } from "../../../hooks/useVisibility";
+
+interface ServiceItem {
+    id: number;
+    title: string;
+    description: string;
+    image: string;
+    details: string[];
+}
 
 const ServicesPageSection: React.FC = () => {
     const location = useLocation();
     const { t, currentLanguage } = useI18n();
+    const [services, setServices] = useState<ServiceItem[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [ref, visible] = useVisibility(0.1);
+    const { theme } = useTheme();
 
-    // Получаем услуги на текущем языке
-    const currentServices = getServicesForDisplay(currentLanguage as 'en' | 'ru');
+    useEffect(() => {
+        const loadServices = async () => {
+            try {
+                const data = await fetchPublicServices(currentLanguage as 'en' | 'ru');
+                setServices(data);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadServices();
+    }, [currentLanguage]);
 
     useEffect(() => {
         const urlParams = new URLSearchParams(location.search);
@@ -24,26 +47,16 @@ const ServicesPageSection: React.FC = () => {
                 }, 500);
             }
         }
-    }, [location]);
-
-    // появление секции
-    const [ref, visible] = useVisibility(0.1);
-
-    // отслеживание темы
-    const { theme } = useTheme();
+    }, [location, services]);
 
     const handleContactClick = (serviceTitle: string) => {
         sessionStorage.setItem('selectedService', serviceTitle);
         window.dispatchEvent(new CustomEvent('serviceSelected', {
             detail: { service: serviceTitle }
         }));
-
         const contactForm = document.querySelector('#contact form');
         if (contactForm) {
-            contactForm.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center'
-            });
+            contactForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
         } else {
             const contactSection = document.getElementById('contact');
             if (contactSection) {
@@ -51,6 +64,10 @@ const ServicesPageSection: React.FC = () => {
             }
         }
     };
+
+    if (loading) {
+        return <div className="text-center py-20">Загрузка...</div>;
+    }
 
     return (
         <section
@@ -60,12 +77,9 @@ const ServicesPageSection: React.FC = () => {
             style={{ padding: "var(--container-padding)" }}
         >
             <div className="max-w-[1920px] mx-auto w-full">
-                {/* Заголовок */}
                 <div
                     className={`overflow-hidden mb-16 transition-transform duration-1000 ${
-                        visible
-                            ? "translate-y-0 opacity-100"
-                            : "translate-y-12 opacity-0"
+                        visible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
                     }`}
                 >
                     <h2 className="text-[2.5rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[7rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
@@ -73,16 +87,13 @@ const ServicesPageSection: React.FC = () => {
                     </h2>
                 </div>
 
-                {/* Список услуг в строчном формате */}
                 <div className="space-y-6 sm:space-y-8">
-                    {currentServices.map((service, index) => (
+                    {services.map((service, index) => (
                         <div
                             key={service.id}
                             id={`service-${service.id}`}
                             className={`relative group transition-all duration-700 ease-out border rounded-none overflow-hidden ${
-                                visible
-                                    ? "opacity-100 translate-y-0"
-                                    : "opacity-0 translate-y-8"
+                                visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
                             }`}
                             style={{
                                 transitionDelay: `${index * 100}ms`,
@@ -90,7 +101,6 @@ const ServicesPageSection: React.FC = () => {
                             }}
                         >
                             <div className="flex flex-col lg:flex-row">
-                                {/* Изображение */}
                                 <div className="lg:w-1/3 h-56 sm:h-64 lg:h-auto">
                                     <img
                                         src={service.image}
@@ -103,7 +113,6 @@ const ServicesPageSection: React.FC = () => {
                                     />
                                 </div>
 
-                                {/* Контент */}
                                 <div className="lg:w-2/3 p-6 sm:p-8 flex flex-col justify-between">
                                     <div>
                                         <div className="flex items-start justify-between mb-6">
@@ -120,7 +129,6 @@ const ServicesPageSection: React.FC = () => {
                                             </div>
                                         </div>
 
-                                        {/* Детали услуги */}
                                         <div className="mb-6">
                                             <h4 className="text-sm font-semibold mb-3! text-[var(--text-secondary)]">
                                                 {t('services.whatWeOffer')}
@@ -136,11 +144,12 @@ const ServicesPageSection: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    {/* Кнопка контакта */}
-                                    <div className="flex justify-between items-center pt-6 border-t"
-                                         style={{
-                                             borderColor: theme === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)"
-                                         }}>
+                                    <div
+                                        className="flex justify-between items-center pt-6 border-t"
+                                        style={{
+                                            borderColor: theme === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)"
+                                        }}
+                                    >
                                         <button
                                             onClick={() => handleContactClick(service.title)}
                                             className="relative inline-flex items-center group/btn"
@@ -169,7 +178,6 @@ const ServicesPageSection: React.FC = () => {
                     ))}
                 </div>
 
-                {/* Нижняя линия */}
                 <DecorativeLine visible={visible} />
             </div>
         </section>

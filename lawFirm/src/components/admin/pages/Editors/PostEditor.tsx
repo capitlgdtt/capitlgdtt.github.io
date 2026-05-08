@@ -1,17 +1,14 @@
 ﻿import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../../hooks/useI18n';
-import type {PostFormData} from "../../../../types/admin.types.ts";
-import LanguageTabs from "../../editor/LanguageTabs.tsx";
-import RichTextEditor from "../../editor/RichTextEditor.tsx";
-import {useDebounce} from "../../../../hooks/useDebounce.ts";
-import {
-    createPost,
-    getCategoriesByLanguage,
-    getPostById,
-    updatePost
-} from "../../../../services/blogService.ts";
-import {useTheme} from "../../../../hooks/useTheme.ts";
+import type { PostFormData } from '../../../../types/admin.types';
+import LanguageTabs from '../../editor/LanguageTabs';
+import RichTextEditor from '../../editor/RichTextEditor';
+import { useDebounce } from '../../../../hooks/useDebounce';
+import { fetchPostById, createPost, updatePost } from '../../../../services/blogService';
+import { useTheme } from '../../../../hooks/useTheme';
+import { apiClient } from '../../../../api/apiClient';
+import {fetchServices} from "../../../../services/serviceService.ts";
 
 const PostEditor: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -21,7 +18,23 @@ const PostEditor: React.FC = () => {
     const isEditing = !!id;
     const postId = id ? parseInt(id) : undefined;
 
-    const categories = getCategoriesByLanguage(siteLanguage as 'en' | 'ru');
+    const [categories, setCategories] = useState<string[]>([]);
+
+    useEffect(() => {
+        const loadCategories = async () => {
+            try {
+                const services = await fetchServices();
+                const uniqueCategories = services.map(s => s.translations.en.title);
+                setCategories(uniqueCategories);
+                if (formData.category === '' && uniqueCategories.length) {
+                    setFormData(prev => ({ ...prev, category: uniqueCategories[0] }));
+                }
+            } catch (err) {
+                console.error('Failed to load categories', err);
+            }
+        };
+        loadCategories();
+    }, []);
 
     const [formData, setFormData] = useState<PostFormData>({
         translations: {
@@ -38,38 +51,50 @@ const PostEditor: React.FC = () => {
     const currentTitle = formData.translations[formData.currentLanguage].title;
     const debouncedTitle = useDebounce(currentTitle, 500);
 
+    const [uploading, setUploading] = useState(false);
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setUploading(true);
+        try {
+            const { url } = await apiClient.uploadFile(file);
+            setFormData(prev => ({ ...prev, image: url }));
+        } catch (err) {
+            console.error('Upload failed', err);
+            alert('Ошибка загрузки изображения');
+        } finally {
+            setUploading(false);
+        }
+    };
+
+
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
 
     const { theme } = useTheme();
 
-    // Загрузка данных поста при редактировании
     useEffect(() => {
         if (isEditing && postId) {
-            const post = getPostById(postId);
-            if (post) {
-                setFormData({
-                    translations: post.translations,
-                    image: post.image,
-                    category: post.category,
-                    slug: post.slug,
-                    currentLanguage: siteLanguage as 'en' | 'ru'
-                });
-            }
+            const loadPost = async () => {
+                try {
+                    const post = await fetchPostById(postId);
+                    setFormData({
+                        translations: post.translations,
+                        image: post.image,
+                        category: post.category,
+                        slug: post.slug,
+                        currentLanguage: siteLanguage as 'en' | 'ru'
+                    });
+                } catch (err) {
+                    console.error(err);
+                    alert('Ошибка загрузки данных');
+                }
+            };
+            loadPost();
         }
     }, [isEditing, postId, siteLanguage]);
-
-    useEffect(() => {
-        const newCategories = getCategoriesByLanguage(siteLanguage as 'en' | 'ru');
-
-        if (!newCategories.includes(formData.category)) {
-            setFormData(prev => ({
-                ...prev,
-                category: newCategories[0]
-            }));
-        }
-    }, [siteLanguage]);
 
     useEffect(() => {
         if (!isSlugManual && debouncedTitle && !formData.slug) {
@@ -78,10 +103,7 @@ const PostEditor: React.FC = () => {
         }
     }, [debouncedTitle, formData.slug, isSlugManual]);
 
-    const handleTranslationChange = (
-        field: 'title' | 'excerpt' | 'content',
-        value: string
-    ) => {
+    const handleTranslationChange = (field: 'title' | 'excerpt' | 'content', value: string) => {
         setFormData(prev => ({
             ...prev,
             translations: {
@@ -107,7 +129,7 @@ const PostEditor: React.FC = () => {
         setFormData(prev => ({ ...prev, slug: value }));
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         const postData = {
             translations: formData.translations,
             image: formData.image || '/blog/default.jpg',
@@ -115,22 +137,24 @@ const PostEditor: React.FC = () => {
             slug: formData.slug || generateSlug(currentTitle)
         };
 
-        if (isEditing && postId) {
-            updatePost(postId, postData);
-        } else {
-            createPost(postData);
+        try {
+            if (isEditing && postId) {
+                await updatePost(postId, postData);
+            } else {
+                await createPost(postData);
+            }
+            navigate('/admin/posts');
+        } catch (err) {
+            console.error('Save failed', err);
+            alert('Ошибка сохранения');
         }
-
-        navigate('/admin/posts');
     };
 
     const handleCancel = () => {
         navigate('/admin/posts');
     };
 
-    // Функция генерации slug с поддержкой кириллицы
     const generateSlug = (text: string): string => {
-        // временная транслитерация
         const translitMap: { [key: string]: string } = {
             'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo',
             'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm',
@@ -143,14 +167,7 @@ const PostEditor: React.FC = () => {
             'Ф': 'f', 'Х': 'h', 'Ц': 'ts', 'Ч': 'ch', 'Ш': 'sh', 'Щ': 'sch', 'Ъ': '',
             'Ы': 'y', 'Ь': '', 'Э': 'e', 'Ю': 'yu', 'Я': 'ya'
         };
-
-        // Транслитерируем текст
-        const transliterated = text
-            .split('')
-            .map(char => translitMap[char] || char)
-            .join('');
-
-        // Генерируем slug из транслитерированного текста
+        const transliterated = text.split('').map(char => translitMap[char] || char).join('');
         return transliterated
             .toLowerCase()
             .replace(/\s+/g, '-')
@@ -171,7 +188,6 @@ const PostEditor: React.FC = () => {
             }}
         >
             <div className="max-w-[1920px] mx-auto w-full">
-                {/* Заголовок */}
                 <div className="overflow-hidden mb-6">
                     <h2 className="text-[2rem] sm:text-[2.5rem] md:text-[3rem] lg:text-[4rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
                         {isEditing ? t('admin.posts.editPost') : t('admin.posts.createPost')}
@@ -179,11 +195,7 @@ const PostEditor: React.FC = () => {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-x-8 gap-y-4 mb-6">
-                    {/* Кнопка возврата */}
-                    <button
-                        onClick={handleCancel}
-                        className="relative inline-flex items-center group py-4"
-                    >
+                    <button onClick={handleCancel} className="relative inline-flex items-center group py-4">
                         <img
                             src="/arrow_details.svg"
                             alt="arrow"
@@ -204,19 +216,11 @@ const PostEditor: React.FC = () => {
                     </button>
                 </div>
 
-                {/* Языковые табы */}
-                <LanguageTabs
-                    currentLanguage={formData.currentLanguage}
-                    onLanguageChange={handleLanguageChange}
-                />
+                <LanguageTabs currentLanguage={formData.currentLanguage} onLanguageChange={handleLanguageChange} />
 
-                {/* Форма */}
                 <div className="space-y-6 mb-8">
-                    {/* Заголовок */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">
-                            {t('admin.posts.form.title')} *
-                        </label>
+                        <label className="block text-sm font-medium mb-2">{t('admin.posts.form.title')} *</label>
                         <input
                             type="text"
                             value={currentTranslation.title}
@@ -226,15 +230,9 @@ const PostEditor: React.FC = () => {
                         />
                     </div>
 
-                    {/* Slug */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">
-                            {t('admin.posts.form.slug')}
-                            {isSlugManual && (
-                                <span className="text-xs text-[var(--accent)] ml-2">
-                                    {t('admin.posts.form.slugManual')}
-                                </span>
-                            )}
+                        <label className="block text-sm font-medium mb-2">{t('admin.posts.form.slug')}
+                            {isSlugManual && <span className="text-xs text-[var(--accent)] ml-2">{t('admin.posts.form.slugManual')}</span>}
                         </label>
                         <div className="flex gap-2">
                             <input
@@ -259,18 +257,12 @@ const PostEditor: React.FC = () => {
                             </button>
                         </div>
                         <p className="text-xs text-[var(--text-secondary)] mt-1">
-                            {isSlugManual
-                                ? t('admin.posts.form.slugHintManual')
-                                : t('admin.posts.form.slugHintAuto')
-                            }
+                            {isSlugManual ? t('admin.posts.form.slugHintManual') : t('admin.posts.form.slugHintAuto')}
                         </p>
                     </div>
 
-                    {/* Краткое описание */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">
-                            {t('admin.posts.form.excerpt')} *
-                        </label>
+                        <label className="block text-sm font-medium mb-2">{t('admin.posts.form.excerpt')} *</label>
                         <textarea
                             value={currentTranslation.excerpt}
                             onChange={(e) => handleTranslationChange('excerpt', e.target.value)}
@@ -280,12 +272,8 @@ const PostEditor: React.FC = () => {
                         />
                     </div>
 
-                    {/* Категория */}
-                    {/* Категория */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">
-                            {t('admin.posts.form.category')} *
-                        </label>
+                        <label className="block text-sm font-medium mb-2">{t('admin.posts.form.category')} *</label>
                         <div className="relative">
                             <select
                                 value={formData.category}
@@ -297,49 +285,42 @@ const PostEditor: React.FC = () => {
                                     borderColor: "var(--text-secondary)"
                                 }}
                             >
-                                {categories.map((category, index) => (
-                                    <option
-                                        key={index}
-                                        value={category}
-                                        style={{
-                                            backgroundColor: theme === "dark" ? "var(--bg-secondary)" : "white",
-                                            color: theme === "dark" ? "var(--text-primary)" : "var(--text-primary)"
-                                        }}
-                                    >
-                                        {category}
-                                    </option>
+                                {categories.map((cat, idx) => (
+                                    <option key={idx} value={cat} style={{
+                                        backgroundColor: theme === "dark" ? "var(--bg-secondary)" : "white",
+                                        color: theme === "dark" ? "var(--text-primary)" : "var(--text-primary)"
+                                    }}>{cat}</option>
                                 ))}
                             </select>
                             <img
                                 src="/arrow_down.svg"
                                 alt=""
                                 className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none w-4 h-4 z-10"
-                                style={{
-                                    filter: theme === "dark" ? "invert(0)" : "invert(1) brightness(2)"
-                                }}
+                                style={{ filter: theme === "dark" ? "invert(0)" : "invert(1) brightness(2)" }}
                             />
                         </div>
                     </div>
 
-                    {/* Изображение */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">
-                            {t('admin.posts.form.image')}
-                        </label>
+                        <label className="block text-sm font-medium mb-2">{t('admin.posts.form.image')}</label>
                         <input
-                            type="text"
-                            value={formData.image}
-                            onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
-                            className="w-full bg-transparent border border-[var(--text-secondary)] px-4 py-3 focus:border-[var(--accent)] outline-none transition-colors"
-                            placeholder="/blog/post1.jpg"
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            onChange={handleImageUpload}
+                            disabled={uploading}
+                            className="w-full bg-transparent border border-[var(--text-secondary)] px-4 py-3 focus:border-[var(--accent)] outline-none transition-colors file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-[var(--accent)] file:text-[var(--bg-primary)] hover:file:opacity-90"
                         />
+                        {formData.image && (
+                            <div className="mt-2">
+                                <img src={formData.image} alt="Preview" className="max-h-32 object-cover rounded" />
+                                <p className="text-xs text-[var(--text-secondary)] mt-1 break-all">{formData.image}</p>
+                            </div>
+                        )}
+                        {uploading && <p className="text-xs text-[var(--text-secondary)] mt-1">Загрузка...</p>}
                     </div>
 
-                    {/* Контент */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">
-                            {t('admin.posts.form.content')} *
-                        </label>
+                        <label className="block text-sm font-medium mb-2">{t('admin.posts.form.content')} *</label>
                         <RichTextEditor
                             content={currentTranslation.content}
                             onChange={handleContentChange}
@@ -348,12 +329,8 @@ const PostEditor: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Кнопки действий */}
                 <div className="flex gap-4">
-                    <button
-                        onClick={handleSave}
-                        className="relative inline-flex items-center group py-4"
-                    >
+                    <button onClick={handleSave} className="relative inline-flex items-center group py-4">
                         <div className="relative overflow-hidden">
                             <div className="text-[var(--accent)] uppercase tracking-wide font-medium transition-transform duration-300 group-hover:-translate-y-full">
                                 {isEditing ? t('admin.posts.update') : t('admin.posts.save')}
@@ -363,7 +340,6 @@ const PostEditor: React.FC = () => {
                             </div>
                         </div>
                     </button>
-
                     <button
                         onClick={handleCancel}
                         className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors uppercase tracking-wide font-medium py-4"

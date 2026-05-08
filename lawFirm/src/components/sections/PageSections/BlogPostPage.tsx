@@ -1,31 +1,56 @@
-﻿import React, {useEffect, useState} from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useI18n } from "../../../hooks/useI18n.ts";
-import DecorativeLine from "../../common/DecorativeLine.tsx";
-import {getPostBySlug, translateCategory, formatDate} from "../../../services/blogService.ts";
-import {useTheme} from "../../../hooks/useTheme.ts";
+import { useI18n } from "../../../hooks/useI18n";
+import DecorativeLine from "../../common/DecorativeLine";
+import { fetchPublicPostBySlug } from "../../../services/blogService";
+import { useTheme } from "../../../hooks/useTheme";
 
 const BlogPostPage: React.FC = () => {
     const { slug } = useParams();
     const navigate = useNavigate();
     const { t, currentLanguage } = useI18n();
-    const [visible, setVisible] = useState(false);
+    const { theme } = useTheme();
 
-    const post = slug ? getPostBySlug(slug) : undefined;
-    const languageKey = currentLanguage as 'en' | 'ru';
+    const [post, setPost] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
+    const [visible, setVisible] = useState(false);
 
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
 
-    // Отслеживание темы
-    const { theme } = useTheme();
-
     useEffect(() => {
         setVisible(true);
     }, []);
 
-    if (!post) {
+    useEffect(() => {
+        if (!slug) return;
+        const loadPost = async () => {
+            setLoading(true);
+            setError(false);
+            try {
+                const data = await fetchPublicPostBySlug(slug, currentLanguage as 'en' | 'ru');
+                setPost(data);
+            } catch (err) {
+                console.error(err);
+                setError(true);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadPost();
+    }, [slug, currentLanguage]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] flex items-center justify-center">
+                <div className="text-center">Загрузка...</div>
+            </div>
+        );
+    }
+
+    if (error || !post) {
         return (
             <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] flex items-center justify-center">
                 <div className="text-center">
@@ -41,19 +66,12 @@ const BlogPostPage: React.FC = () => {
         );
     }
 
-    const translation = post.translations[languageKey] || post.translations.en;
-
-    // Переводим категорию и дату
-    const translatedCategory = translateCategory(post.category, languageKey);
-    const formattedDate = formatDate(post.date, languageKey);
-
     return (
         <section
             className="relative bg-[var(--bg-primary)] text-[var(--text-primary)] overflow-hidden min-h-screen"
             style={{ padding: "var(--container-padding)", paddingTop: "calc(var(--header-height) + 1rem)" }}
         >
             <div className="max-w-[1920px] mx-auto w-full">
-                {/* Кнопка назад */}
                 <div className="mb-2">
                     <button
                         onClick={() => navigate('/blog')}
@@ -79,26 +97,23 @@ const BlogPostPage: React.FC = () => {
                     </button>
                 </div>
 
-                {/* Заголовок поста */}
                 <div className="mb-2">
                     <div className="overflow-hidden mb-6">
                         <h1 className="text-[2rem] sm:text-[3rem] md:text-[4rem] lg:text-[6rem] font-syne uppercase font-semibold leading-tight break-words">
-                            {translation.title}
+                            {post.title}
                         </h1>
                     </div>
 
-                    {/* Информация */}
                     <div className="flex items-center space-x-4 text-[var(--text-secondary)] text-lg mb-8">
-                        <span>{formattedDate}</span>
+                        <span>{post.date}</span>
                         <div className="w-2 h-2 rounded-full bg-current"></div>
-                        <span>{translatedCategory}</span>
+                        <span>{post.category}</span>
                     </div>
 
-                    {/* Изображение поста */}
                     <div className="relative h-80 sm:h-96 md:h-[500px] mb-8 overflow-hidden rounded-lg">
                         <img
                             src={post.image}
-                            alt={translation.title}
+                            alt={post.title}
                             className={`w-full h-full object-cover transition-all duration-500 ${
                                 theme === "dark"
                                     ? "brightness-50 contrast-110 saturate-90"
@@ -108,30 +123,25 @@ const BlogPostPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Контент поста */}
                 <div className="w-full">
                     <div className="prose prose-lg max-w-none text-[var(--text-primary)]">
-                        {/* Краткое описание */}
                         <p className="text-xl text-[var(--text-secondary)] leading-relaxed italic">
-                            {translation.excerpt}
+                            {post.excerpt}
                         </p>
 
-                        {/* Линия разделитель */}
                         <div className="relative -mx-10 mt-4">
                             <DecorativeLine visible={visible} color="var(--accent)" delay={500} />
                         </div>
 
-                        {/* Основной контент */}
                         <div className="space-y-6 text-lg leading-relaxed mt-12">
                             <div
-                                className="prose prose-lg max-w-none text-[var(--text-primary) tiptap-editor"
-                                dangerouslySetInnerHTML={{ __html: translation.content }}
+                                className="prose prose-lg max-w-none text-[var(--text-primary)] tiptap-editor"
+                                dangerouslySetInnerHTML={{ __html: post.content }}
                             />
                         </div>
                     </div>
                 </div>
 
-                {/* Нижняя линия секции */}
                 <DecorativeLine visible={visible} delay={1000} />
             </div>
         </section>

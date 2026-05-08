@@ -2,53 +2,34 @@
 import { Link } from 'react-router-dom';
 import {useI18n} from "../../hooks/useI18n.ts";
 import DecorativeLine from "../common/DecorativeLine.tsx";
-import {formatDate, getPosts, translateCategory} from "../../services/blogService.ts";
 import {useVisibility} from "../../hooks/useVisibility.ts";
 import {useTheme} from "../../hooks/useTheme.ts";
 
+interface BlogSectionProps {
+    posts: any[];
+}
 
-const BlogSection: React.FC = () => {
+const BlogSection: React.FC<BlogSectionProps> = ({ posts }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const postsContainerRef = useRef<HTMLDivElement>(null);
-    const { t, currentLanguage } = useI18n();
-
-    // Получаем посты на текущем языке
-    const allPosts = getPosts();
-    const languageKey = currentLanguage as 'en' | 'ru';
-
-    const currentPosts = allPosts.map(post => ({
-        id: post.id,
-        title: post.translations[languageKey]?.title || post.translations.en.title,
-        excerpt: post.translations[languageKey]?.excerpt || post.translations.en.excerpt,
-        content: post.translations[languageKey]?.content || post.translations.en.content,
-        date: formatDate(post.date, languageKey),
-        image: post.image,
-        category: translateCategory(post.category, languageKey),
-        slug: post.slug
-    }));
-
-    // появление секции
+    const { t } = useI18n();
     const [ref, visible] = useVisibility(0.2);
-
-    // отслеживание темы
     const { theme } = useTheme();
 
     const nextPost = () => {
-        setCurrentIndex((prev) => (prev + 1) % currentPosts.length);
+        setCurrentIndex((prev) => (prev + 1) % posts.length);
     };
 
     const prevPost = () => {
-        setCurrentIndex((prev) => (prev - 1 + currentPosts.length) % currentPosts.length);
+        setCurrentIndex((prev) => (prev - 1 + posts.length) % posts.length);
     };
 
-    // количество отображаемых постов в зависимости от размера экрана
     const [postsPerView, setPostsPerView] = useState(3);
 
     useEffect(() => {
         const handleResize = () => {
             setPostsPerView(window.innerWidth < 768 ? 1 : 3);
         };
-
         handleResize();
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
@@ -66,9 +47,7 @@ const BlogSection: React.FC = () => {
                 <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-8 gap-4">
                     <div
                         className={`overflow-hidden transition-transform duration-1000 ${
-                            visible
-                                ? "translate-y-0 opacity-100"
-                                : "translate-y-12 opacity-0"
+                            visible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
                         }`}
                     >
                         <h2 className="text-[2.5rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[7rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
@@ -127,25 +106,18 @@ const BlogSection: React.FC = () => {
                         }}
                     >
                         {/* Дублируем посты для бесконечной прокрутки */}
-                        {[...currentPosts, ...currentPosts, ...currentPosts].map((post, index) => (
+                        {[...posts, ...posts, ...posts].map((post, index) => (
                             <article
                                 key={`${post.id}-${index}`}
                                 className={`relative p-8 transition-all duration-700 ease-out border rounded-none overflow-hidden group h-[420px] flex flex-col justify-between flex-shrink-0 ${
-                                    visible
-                                        ? "opacity-100 translate-y-0"
-                                        : "opacity-0 translate-y-8"
+                                    visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
                                 } ${
-                                    theme === "light"
-                                        ? "group hover:text-[var(--primary-light)]"
-                                        : ""
+                                    theme === "light" ? "group hover:text-[var(--primary-light)]" : ""
                                 }`}
                                 style={{
                                     width: `calc(${100 / postsPerView}% - ${(postsPerView - 1) * 32 / postsPerView}px)`,
                                     minWidth: `calc(${100 / postsPerView}% - ${(postsPerView - 1) * 32 / postsPerView}px)`,
-                                    borderColor:
-                                        theme === "dark"
-                                            ? "rgba(255,255,255,0.25)"
-                                            : "rgba(0,0,0,0.25)",
+                                    borderColor: theme === "dark" ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)",
                                 }}
                             >
                                 {/* Фон-картинка */}
@@ -153,16 +125,12 @@ const BlogSection: React.FC = () => {
                                     className="absolute inset-0 bg-cover bg-center opacity-0 group-hover:opacity-100 transition-opacity duration-700"
                                     style={{
                                         backgroundImage: `url(${post.image})`,
-                                        filter:
-                                            theme === "dark"
-                                                ? "brightness(0.5) contrast(110%) saturate(90%)"
-                                                : "brightness(0.75) contrast(95%) saturate(100%)",
+                                        filter: theme === "dark" ? "brightness(0.5) contrast(110%) saturate(90%)" : "brightness(0.75) contrast(95%) saturate(100%)",
                                     }}
                                 />
 
                                 {/* Контент поверх */}
                                 <div className="relative z-10 flex flex-col justify-between h-full">
-                                    {/* Верх — заголовок */}
                                     <div>
                                         <h3 className="text-2xl font-syne font-semibold mb-4 leading-snug line-clamp-3">
                                             {post.title}
@@ -172,7 +140,6 @@ const BlogSection: React.FC = () => {
                                         </p>
                                     </div>
 
-                                    {/* Нижняя часть */}
                                     <div>
                                         <div className="flex items-center space-x-3 text-secondary text-sm mb-4">
                                             <span>{post.date}</span>
@@ -180,7 +147,6 @@ const BlogSection: React.FC = () => {
                                             <span>{post.category}</span>
                                         </div>
 
-                                        {/* Кнопка "read more" */}
                                         <Link
                                             to={`/blog/${post.slug}`}
                                             className="relative inline-flex items-center group/btn py-2"
@@ -198,10 +164,7 @@ const BlogSection: React.FC = () => {
                                                 alt="arrow"
                                                 className="w-4 h-4 ml-2 transition-transform duration-300 group-hover/btn:translate-x-1"
                                                 style={{
-                                                    filter:
-                                                        theme === "dark"
-                                                            ? "invert(1) brightness(2)"
-                                                            : "invert(0)",
+                                                    filter: theme === "dark" ? "invert(1) brightness(2)" : "invert(0)",
                                                 }}
                                             />
                                         </Link>
@@ -235,10 +198,7 @@ const BlogSection: React.FC = () => {
                             alt="arrow"
                             className="w-4 h-4 ml-2 transition-transform duration-300 group-hover:translate-x-1"
                             style={{
-                                filter:
-                                    theme === "dark"
-                                        ? "invert(1) brightness(2)"
-                                        : "invert(0)",
+                                filter: theme === "dark" ? "invert(1) brightness(2)" : "invert(0)",
                             }}
                         />
                     </Link>

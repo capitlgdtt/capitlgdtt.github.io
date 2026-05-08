@@ -2,23 +2,17 @@
 import { useI18n } from "../../hooks/useI18n.ts";
 import {Link} from "react-router-dom";
 import DecorativeLine from "../common/DecorativeLine.tsx";
-import {getServicesForDisplay} from "../../services/serviceService.ts";
 import {useVisibility} from "../../hooks/useVisibility.ts";
 import {useTheme} from "../../hooks/useTheme.ts";
 
-const ServicesSection: React.FC = () => {
-    const { t, currentLanguage } = useI18n();
+interface ServicesSectionProps {
+    services: any[];
+}
 
-    // Получаем услуги на текущем языке
-    const currentServices = getServicesForDisplay(currentLanguage as 'en' | 'ru');
-
-    // появление секции
+const ServicesSection: React.FC<ServicesSectionProps> = ({ services }) => {
+    const { t } = useI18n();
     const [ref, visible] = useVisibility(0.2);
-
-    // Отслеживаем тему
     const { theme } = useTheme();
-
-    // Смещение правой колонки
     const columnOffset = 60;
 
     return (
@@ -35,9 +29,7 @@ const ServicesSection: React.FC = () => {
                 {/* Заголовок секции */}
                 <div
                     className={`overflow-hidden mb-8 transition-transform duration-1000 ${
-                        visible
-                            ? "translate-y-0 opacity-100"
-                            : "translate-y-12 opacity-0"
+                        visible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
                     }`}
                 >
                     <h2 className="text-[2.5rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[7rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
@@ -47,20 +39,16 @@ const ServicesSection: React.FC = () => {
 
                 {/* Сетка карточек */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 md:gap-x-8 lg:gap-x-12 gap-y-8 md:gap-y-12">
-                    {currentServices.map((service) => (
+                    {services.map((service) => (
                         <div
                             key={service.id}
                             className={`relative p-6 sm:p-8 bg-[var(--bg-secondary)] text-[var(--text-primary)] transition-all duration-400 ease-out 
-                                        flex flex-col justify-between h-[350px] sm:h-[380px] md:h-[420px] shadow-lg
-                                        hover:scale-105 hover:shadow-xl cursor-pointer'
-                            ${
-                                visible
-                                    ? "opacity-100 translate-y-0"
-                                    : "opacity-0 translate-y-20"
+                          flex flex-col justify-between h-[350px] sm:h-[380px] md:h-[420px] shadow-lg
+                          hover:scale-105 hover:shadow-xl cursor-pointer'
+              ${
+                                visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20"
                             }`}
-                            style={{
-                                transitionDelay: `100ms`,
-                            }}
+                            style={{ transitionDelay: `100ms` }}
                         >
                             <div>
                                 <h3 className="text-2xl md:text-3xl font-semibold mb-4! font-syne">
@@ -99,7 +87,6 @@ const ServicesSection: React.FC = () => {
                                     {String(service.id).padStart(2, "0")}
                                 </div>
                             </div>
-
                         </div>
                     ))}
                 </div>
@@ -108,12 +95,12 @@ const ServicesSection: React.FC = () => {
             {/* Смещение второй колонки */}
             <style>
                 {`
-                @media (min-width: 768px) {
-                    #services .grid > div:nth-child(2n) {
-                        transform: translateY(${columnOffset}px);
-                    }
-                }
-                `}
+          @media (min-width: 768px) {
+            #services .grid > div:nth-child(2n) {
+              transform: translateY(${columnOffset}px);
+            }
+          }
+        `}
             </style>
 
             {/* Кнопка see all*/}

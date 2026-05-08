@@ -2,21 +2,17 @@
 import { useI18n } from "../../hooks/useI18n.ts";
 import {Link} from "react-router-dom";
 import DecorativeLine from "../common/DecorativeLine.tsx";
-import {getLimitedTeamMembersForDisplay} from "../../services/teamService.ts";
 import {useVisibility} from "../../hooks/useVisibility.ts";
 import {useTheme} from "../../hooks/useTheme.ts";
 
-const TeamSection: React.FC = () => {
+interface TeamSectionProps {
+    teamMembers: any[]; // массив сотрудников, уже переведённых
+}
+
+const TeamSection: React.FC<TeamSectionProps> = ({ teamMembers }) => {
     const [hoveredMember, setHoveredMember] = useState<number | null>(null);
-    const { t, currentLanguage } = useI18n();
-
-    // Получаем команду на текущем языке
-    const members = getLimitedTeamMembersForDisplay(currentLanguage as 'en' | 'ru', 4);
-
-    // появление секции
+    const { t } = useI18n();
     const [ref, visible] = useVisibility(0.2);
-
-    // отслеживание темы
     const { theme } = useTheme();
 
     return (
@@ -30,9 +26,7 @@ const TeamSection: React.FC = () => {
                 {/* Заголовок*/}
                 <div
                     className={`overflow-hidden mb-8 transition-transform duration-1000 ${
-                        visible
-                            ? "translate-y-0 opacity-100"
-                            : "translate-y-12 opacity-0"
+                        visible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
                     }`}
                 >
                     <h2 className="text-[2.5rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[7rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
@@ -42,7 +36,7 @@ const TeamSection: React.FC = () => {
 
                 {/* Список команды */}
                 <div className="space-y-0">
-                    {members.map((member, index) => {
+                    {teamMembers.map((member, index) => {
                         return (
                             <div
                                 key={member.id}
@@ -122,10 +116,7 @@ const TeamSection: React.FC = () => {
                             alt="arrow"
                             className="w-4 h-4 ml-2 transition-transform duration-300 group-hover:translate-x-1"
                             style={{
-                                filter:
-                                    theme === "dark"
-                                        ? "invert(1) brightness(2)"
-                                        : "invert(0)",
+                                filter: theme === "dark" ? "invert(1) brightness(2)" : "invert(0)",
                             }}
                         />
                     </Link>

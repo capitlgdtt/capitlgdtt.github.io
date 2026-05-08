@@ -1,42 +1,73 @@
 ﻿import React, { useEffect, useState } from 'react';
 import { useI18n } from '../../../hooks/useI18n';
-import {getTeamMembers, translateSpecialization, translateTeamMember, deleteTeamMember} from "../../../services/teamService.ts";
-import {Link} from "react-router-dom";
-import type {TeamMember} from "../../../types";
+import { fetchTeamMembers, deleteTeamMember } from '../../../services/teamService';
+import { Link } from 'react-router-dom';
+import type { TeamMember } from '../../../types';
 
 const TeamManager: React.FC = () => {
     const { t, currentLanguage } = useI18n();
     const [team, setTeam] = useState<TeamMember[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
     useEffect(() => {
-        const currentTeam = getTeamMembers();
-        setTeam(currentTeam);
+        loadTeam();
     }, []);
 
-    const getMemberForDisplay = (member: TeamMember) => {
-        const language = currentLanguage as 'en' | 'ru';
-        const translated = translateTeamMember(member, language);
-        const translatedSpecs = translateSpecialization(member.specialization, language);
+    const loadTeam = async () => {
+        setLoading(true);
+        try {
+            const data = await fetchTeamMembers();
+            setTeam(data);
+        } catch (err: any) {
+            setError(err.message || 'Ошибка загрузки');
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    const getMemberForDisplay = (member: TeamMember) => {
+        const lang = currentLanguage as 'en' | 'ru';
+        const translation = member.translations[lang] || member.translations.en;
         return {
-            ...translated,
-            specialization: translatedSpecs,
-            experience: member.experience
+            ...member,
+            name: translation.name,
+            role: translation.role,
+            description: translation.description,
+            specialization: member.specialization,
         };
     };
+
     const handleDeleteMember = async (memberId: number, memberName: string) => {
         const confirmed = window.confirm(
             `${t('admin.team.deleteConfirm.message')} "${memberName}"?`
         );
+        if (!confirmed) return;
 
-        if (confirmed) {
-            const success = deleteTeamMember(memberId);
-            if (success) {
-                setTeam(getTeamMembers());
-                alert(t('admin.team.deleteConfirm.deleted'));
-            }
+        try {
+            await deleteTeamMember(memberId);
+            await loadTeam();
+            alert(t('admin.team.deleteConfirm.deleted'));
+        } catch (err: any) {
+            alert(err.message || 'Ошибка удаления');
         }
     };
+
+    if (loading) {
+        return (
+            <section className="relative bg-[var(--bg-primary)] text-[var(--text-primary)] min-h-screen flex items-center justify-center">
+                <div>{t('common.loading')}</div>
+            </section>
+        );
+    }
+
+    if (error) {
+        return (
+            <section className="relative bg-[var(--bg-primary)] text-[var(--text-primary)] min-h-screen flex items-center justify-center">
+                <div className="text-red-500">{error}</div>
+            </section>
+        );
+    }
 
     return (
         <section
@@ -47,7 +78,6 @@ const TeamManager: React.FC = () => {
             }}
         >
             <div className="max-w-[1920px] mx-auto w-full">
-                {/* Заголовок */}
                 <div className="overflow-hidden mb-6">
                     <h2 className="text-[2rem] sm:text-[2.5rem] md:text-[3rem] lg:text-[4rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
                         {t('admin.team.title')}
@@ -55,11 +85,7 @@ const TeamManager: React.FC = () => {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-x-8 gap-y-4 mb-6">
-                    {/* Кнопка возврата */}
-                    <Link
-                        to="/admin"
-                        className="relative inline-flex items-center group py-4"
-                    >
+                    <Link to="/admin" className="relative inline-flex items-center group py-4">
                         <img
                             src="/arrow_details.svg"
                             alt="arrow"
@@ -79,11 +105,7 @@ const TeamManager: React.FC = () => {
                         </div>
                     </Link>
 
-                    {/* Кнопка добавления */}
-                    <Link
-                        to="/admin/team/create"
-                        className="relative inline-flex items-center group py-4"
-                    >
+                    <Link to="/admin/team/create" className="relative inline-flex items-center group py-4">
                         <div className="relative overflow-hidden">
                             <div className="text-[var(--accent)] uppercase tracking-wide font-medium transition-transform duration-300 group-hover:-translate-y-full">
                                 {t('admin.team.add')}
@@ -103,15 +125,9 @@ const TeamManager: React.FC = () => {
                     </Link>
                 </div>
 
-                {/* Сетка команды */}
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     {team.map((member) => {
-                        console.log('Member ID:', member.id);
-                        console.log('Specialization RAW:', member.specialization);
-                        console.log('Specialization type:', typeof member.specialization);
-
                         const displayMember = getMemberForDisplay(member);
-                        console.log('Specialization DISPLAY:', displayMember.specialization);
                         return (
                             <div
                                 key={member.id}
@@ -139,8 +155,8 @@ const TeamManager: React.FC = () => {
                                         <div className="flex flex-wrap gap-2 mt-2">
                                             {displayMember.specialization.slice(0, 6).map((spec, idx) => (
                                                 <span key={idx} className="text-xs bg-[var(--bg-secondary)] px-2 py-1">
-                                                {spec}
-                                            </span>
+                          {spec}
+                        </span>
                                             ))}
                                         </div>
                                     </div>
@@ -167,7 +183,7 @@ const TeamManager: React.FC = () => {
                                     </button>
                                 </div>
                             </div>
-                        )
+                        );
                     })}
                 </div>
             </div>

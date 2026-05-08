@@ -11,21 +11,16 @@ const AdminLogin: React.FC = () => {
     const { login } = useAdminAuth();
     const navigate = useNavigate();
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-
         if (!username.trim() || !password.trim()) {
             setError(t('admin.login.errors.required'));
             return;
         }
-
-        const success = login(username, password);
-
+        const success = await login(username, password);
         if (success) {
-            setTimeout(() => {
-                navigate('/admin');
-            }, 100);
+            navigate('/admin');
         } else {
             setError(t('admin.login.errors.invalid'));
         }
@@ -79,14 +74,6 @@ const AdminLogin: React.FC = () => {
                     >
                         {t('admin.login.submit')}
                     </button>
-
-                    {/* Подсказка для тестирования */}
-                    <div className="text-xs text-[var(--text-secondary)] text-center mt-4 p-3 bg-[var(--bg-secondary)]">
-                        <p>Демо доступы:</p>
-                        <p>• admin / admin (суперадмин)</p>
-                        <p>• manager / manager (админ)</p>
-                        <p>• editor / editor (редактор)</p>
-                    </div>
                 </form>
             </div>
         </section>

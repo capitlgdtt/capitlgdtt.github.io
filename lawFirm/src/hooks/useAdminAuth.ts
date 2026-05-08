@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect } from 'react';
-import { validateLogin } from '../services/adminService';
+import { login } from '../services/adminService';
 
 export const useAdminAuth = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -7,40 +7,31 @@ export const useAdminAuth = () => {
     const [currentAdmin, setCurrentAdmin] = useState<any>(null);
 
     useEffect(() => {
-        // Проверяем наличие токена и администратора в localStorage
-        const token = localStorage.getItem('admin_token');
+        const token = localStorage.getItem('access_token');
         const adminData = localStorage.getItem('admin_data');
-
         if (token && adminData) {
-            try {
-                const admin = JSON.parse(adminData);
-                setIsAuthenticated(true);
-                setCurrentAdmin(admin);
-            } catch (error) {
-                localStorage.removeItem('admin_token');
-                localStorage.removeItem('admin_data');
-                setIsAuthenticated(false);
-            }
+            setIsAuthenticated(true);
+            setCurrentAdmin(JSON.parse(adminData));
         }
         setIsLoading(false);
     }, []);
 
-    const login = (username: string, password: string): boolean => {
-        const admin = validateLogin(username, password);
-
-        if (admin) {
-            const token = 'admin_token_' + Date.now() + '_' + admin.id;
-            localStorage.setItem('admin_token', token);
-            localStorage.setItem('admin_data', JSON.stringify(admin));
+    const loginUser = async (username: string, password: string): Promise<boolean> => {
+        try {
+            const response = await login(username, password);
+            localStorage.setItem('access_token', response.access_token);
+            localStorage.setItem('admin_data', JSON.stringify(response.user));
             setIsAuthenticated(true);
-            setCurrentAdmin(admin);
+            setCurrentAdmin(response.user);
             return true;
+        } catch (error) {
+            console.error('Login failed', error);
+            return false;
         }
-        return false;
     };
 
     const logout = () => {
-        localStorage.removeItem('admin_token');
+        localStorage.removeItem('access_token');
         localStorage.removeItem('admin_data');
         setIsAuthenticated(false);
         setCurrentAdmin(null);
@@ -50,7 +41,7 @@ export const useAdminAuth = () => {
         isAuthenticated,
         isLoading,
         currentAdmin,
-        login,
-        logout
+        login: loginUser,
+        logout,
     };
 };

@@ -1,8 +1,8 @@
 ﻿import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../../hooks/useI18n';
-import { getAdminById, createAdmin, updateAdmin } from '../../../../services/adminService';
-import {useTheme} from "../../../../hooks/useTheme.ts";
+import { fetchAdminById, createAdmin, updateAdmin } from '../../../../services/adminService';
+import { useTheme } from '../../../../hooks/useTheme';
 
 const AdminEditor: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -22,19 +22,24 @@ const AdminEditor: React.FC = () => {
 
     const [errors, setErrors] = useState<Record<string, string>>({});
 
-    // Загрузка данных при редактировании
     useEffect(() => {
         if (isEditing && adminId) {
-            const admin = getAdminById(adminId);
-            if (admin) {
-                setFormData({
-                    username: admin.username,
-                    email: admin.email,
-                    password: '',
-                    confirmPassword: '',
-                    role: admin.role
-                });
-            }
+            const loadAdmin = async () => {
+                try {
+                    const admin = await fetchAdminById(adminId);
+                    setFormData({
+                        username: admin.username,
+                        email: admin.email,
+                        password: '',
+                        confirmPassword: '',
+                        role: admin.role
+                    });
+                } catch (err) {
+                    console.error(err);
+                    alert('Ошибка загрузки данных');
+                }
+            };
+            loadAdmin();
         }
     }, [isEditing, adminId]);
 
@@ -59,16 +64,13 @@ const AdminEditor: React.FC = () => {
             } else if (formData.password.length < 6) {
                 newErrors.password = t('admin.admins.form.errors.minLength', { length: 6 });
             }
-
             if (formData.password !== formData.confirmPassword) {
                 newErrors.confirmPassword = t('admin.admins.form.errors.passwordsMatch');
             }
         } else {
-            // При редактировании пароль не обязателен
             if (formData.password && formData.password.length < 6) {
                 newErrors.password = t('admin.admins.form.errors.minLength', { length: 6 });
             }
-
             if (formData.password && formData.password !== formData.confirmPassword) {
                 newErrors.confirmPassword = t('admin.admins.form.errors.passwordsMatch');
             }
@@ -78,28 +80,28 @@ const AdminEditor: React.FC = () => {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!validateForm()) return;
 
         try {
             if (isEditing && adminId) {
-                // Обновление - если пароль пустой, не меняем его
                 const updateData: any = {
                     username: formData.username,
                     email: formData.email,
                     role: formData.role
                 };
-
                 if (formData.password) {
-                    updateData.passwordHash = formData.password; // В реальном приложении хэшировать
+                    updateData.password = formData.password;
                 }
-
-                updateAdmin(adminId, updateData);
+                await updateAdmin(adminId, updateData);
             } else {
-                // Создание
-                createAdmin(formData);
+                await createAdmin({
+                    username: formData.username,
+                    email: formData.email,
+                    password: formData.password,
+                    role: formData.role
+                });
             }
-
             navigate('/admin/admins');
         } catch (error: any) {
             alert(error.message || t('admin.admins.form.errors.saveError'));
@@ -121,7 +123,6 @@ const AdminEditor: React.FC = () => {
             }}
         >
             <div className="max-w-[1920px] mx-auto w-full">
-                {/* Заголовок */}
                 <div className="overflow-hidden mb-6">
                     <h2 className="text-[2rem] sm:text-[2.5rem] md:text-[3rem] lg:text-[4rem] font-syne uppercase font-semibold whitespace-normal break-words leading-tight">
                         {isEditing ? t('admin.admins.editAdmin') : t('admin.admins.createAdmin')}
@@ -129,7 +130,6 @@ const AdminEditor: React.FC = () => {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-x-8 gap-y-4 mb-6">
-                    {/* Кнопка возврата */}
                     <button
                         onClick={handleCancel}
                         className="relative inline-flex items-center group py-4"
@@ -154,9 +154,7 @@ const AdminEditor: React.FC = () => {
                     </button>
                 </div>
 
-                {/* Форма */}
                 <div className="space-y-6 mb-8 max-w-2xl">
-                    {/* Username */}
                     <div>
                         <label className="block text-sm font-medium mb-2">
                             {t('admin.admins.form.username')} *
@@ -170,12 +168,9 @@ const AdminEditor: React.FC = () => {
                             }`}
                             placeholder={t('admin.admins.form.usernamePlaceholder')}
                         />
-                        {errors.username && (
-                            <p className="text-red-500 text-xs mt-1">{errors.username}</p>
-                        )}
+                        {errors.username && <p className="text-red-500 text-xs mt-1">{errors.username}</p>}
                     </div>
 
-                    {/* Email */}
                     <div>
                         <label className="block text-sm font-medium mb-2">
                             {t('admin.admins.form.email')} *
@@ -189,12 +184,9 @@ const AdminEditor: React.FC = () => {
                             }`}
                             placeholder="admin@company.com"
                         />
-                        {errors.email && (
-                            <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-                        )}
+                        {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                     </div>
 
-                    {/* Password */}
                     <div>
                         <label className="block text-sm font-medium mb-2">
                             {isEditing ? t('admin.admins.form.passwordOptional') : t('admin.admins.form.password')} *
@@ -208,18 +200,12 @@ const AdminEditor: React.FC = () => {
                             }`}
                             placeholder={isEditing ? t('admin.admins.form.passwordLeaveEmpty') : t('admin.admins.form.passwordPlaceholder')}
                         />
-                        {errors.password && (
-                            <p className="text-red-500 text-xs mt-1">{errors.password}</p>
-                        )}
+                        {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
                         <p className="text-xs text-[var(--text-secondary)] mt-1">
-                            {isEditing
-                                ? t('admin.admins.form.passwordHintEdit')
-                                : t('admin.admins.form.passwordHintCreate')
-                            }
+                            {isEditing ? t('admin.admins.form.passwordHintEdit') : t('admin.admins.form.passwordHintCreate')}
                         </p>
                     </div>
 
-                    {/* Confirm Password */}
                     <div>
                         <label className="block text-sm font-medium mb-2">
                             {t('admin.admins.form.confirmPassword')} {!isEditing && '*'}
@@ -233,12 +219,9 @@ const AdminEditor: React.FC = () => {
                             }`}
                             placeholder={t('admin.admins.form.confirmPasswordPlaceholder')}
                         />
-                        {errors.confirmPassword && (
-                            <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
-                        )}
+                        {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
                     </div>
 
-                    {/* Role */}
                     <div>
                         <label className="block text-sm font-medium mb-2">
                             {t('admin.admins.form.role')} *
@@ -247,40 +230,29 @@ const AdminEditor: React.FC = () => {
                             <select
                                 value={formData.role}
                                 onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value as any }))}
-                                className={`w-full bg-transparent border px-4 py-3 focus:border-[var(--accent)] outline-none transition appearance-none pr-12 ${
-                                    'border-[var(--text-secondary)]'
-                                }`}
+                                className={`w-full bg-transparent border px-4 py-3 focus:border-[var(--accent)] outline-none transition appearance-none pr-12 border-[var(--text-secondary)]`}
                                 style={{
                                     backgroundColor: theme === "dark" ? "var(--bg-secondary)" : "transparent",
                                     color: "var(--text-primary)"
                                 }}
                             >
-                                <option
-                                    value="editor"
-                                    style={{
-                                        backgroundColor: theme === "dark" ? "var(--bg-secondary)" : "white",
-                                        color: theme === "dark" ? "var(--text-primary)" : "var(--text-primary)"
-                                    }}
-                                >
+                                <option value="editor" style={{
+                                    backgroundColor: theme === "dark" ? "var(--bg-secondary)" : "white",
+                                    color: theme === "dark" ? "var(--text-primary)" : "var(--text-primary)"
+                                }}>
                                     {t('admin.admins.roles.editor')}
                                 </option>
-                                <option
-                                    value="admin"
-                                    style={{
-                                        backgroundColor: theme === "dark" ? "var(--bg-secondary)" : "white",
-                                        color: theme === "dark" ? "var(--text-primary)" : "var(--text-primary)"
-                                    }}
-                                >
+                                <option value="admin" style={{
+                                    backgroundColor: theme === "dark" ? "var(--bg-secondary)" : "white",
+                                    color: theme === "dark" ? "var(--text-primary)" : "var(--text-primary)"
+                                }}>
                                     {t('admin.admins.roles.admin')}
                                 </option>
                                 {!isEditing && (
-                                    <option
-                                        value="superadmin"
-                                        style={{
-                                            backgroundColor: theme === "dark" ? "var(--bg-secondary)" : "white",
-                                            color: theme === "dark" ? "var(--text-primary)" : "var(--text-primary)"
-                                        }}
-                                    >
+                                    <option value="superadmin" style={{
+                                        backgroundColor: theme === "dark" ? "var(--bg-secondary)" : "white",
+                                        color: theme === "dark" ? "var(--text-primary)" : "var(--text-primary)"
+                                    }}>
                                         {t('admin.admins.roles.superadmin')}
                                     </option>
                                 )}
@@ -300,7 +272,6 @@ const AdminEditor: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Кнопки действий */}
                 <div className="flex gap-4">
                     <button
                         onClick={handleSave}
@@ -315,7 +286,6 @@ const AdminEditor: React.FC = () => {
                             </div>
                         </div>
                     </button>
-
                     <button
                         onClick={handleCancel}
                         className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors uppercase tracking-wide font-medium py-4"
