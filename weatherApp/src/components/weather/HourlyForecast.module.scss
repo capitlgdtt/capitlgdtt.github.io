@@ -1,0 +1,73 @@
+﻿.hourlyCard {
+  padding: 24px;
+  background-color: var(--card-bg, #fff);
+  border-radius: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  color: var(--text-primary, #292929);
+  transition: background 0.3s ease;
+  height: 100%;
+  width: 100%;
+
+  .title {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+
+  .cardsContainer {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+
+    @media (max-width: 600px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .forecastItem {
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    min-height: 180px;
+  }
+
+  .time {
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .weatherIcon {
+    width: 64px;
+    height: 64px;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
+  }
+
+  .temp {
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .wind {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .windIcon {
+    width: 32px;
+    height: 32px;
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3));
+  }
+
+  .windSpeed {
+    font-size: 20px;
+    font-weight: 700;
+  }
+}

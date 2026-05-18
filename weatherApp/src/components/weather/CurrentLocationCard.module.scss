@@ -1,0 +1,33 @@
+﻿.currentLocationCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background-color: var(--card-bg, #fff);
+  border-radius: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  color: var(--text-primary, #292929);
+  transition: background 0.3s ease;
+  min-height: 320px;
+  width: 100%;
+
+  .city {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .time {
+    font-size: 96px;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    line-height: 1;
+  }
+
+  .date {
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--text-secondary, #666);
+  }
+}
